@@ -9,7 +9,9 @@ const tijdWaardeGetal = document.getElementById("tijd-waarde-getal");
 const tijdWaarschuwing = document.getElementById("tijd-waarschuwing");
 const beginKnop = document.getElementById("begin-knop");
 
-tijdSlider.value = String(haalTijdslimietOp());
+// De slider start elke keer weer op 15 minuten (het midden), in plaats van
+// de vorige keuze te onthouden.
+tijdSlider.value = "15";
 
 function werkTijdWeergaveBij() {
   const minuten = parseInt(tijdSlider.value, 10);
