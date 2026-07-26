@@ -9,10 +9,6 @@ const tijdWaardeGetal = document.getElementById("tijd-waarde-getal");
 const tijdWaarschuwing = document.getElementById("tijd-waarschuwing");
 const beginKnop = document.getElementById("begin-knop");
 
-// De slider start elke keer weer op 15 minuten (het midden), in plaats van
-// de vorige keuze te onthouden.
-tijdSlider.value = "15";
-
 function werkTijdWeergaveBij() {
   const minuten = parseInt(tijdSlider.value, 10);
   tijdWaardeGetal.textContent = minuten;
@@ -21,8 +17,20 @@ function werkTijdWeergaveBij() {
   beginKnop.disabled = !geldig;
 }
 
+// De slider start elke keer weer op 15 minuten (het midden), in plaats van
+// de vorige keuze te onthouden. Dit moet ook gebeuren wanneer de pagina uit
+// de bfcache van de browser komt (bv. na "Terug naar startscherm" en
+// opnieuw op een oefening klikken), want dan draait dit script niet
+// opnieuw en kan de browser zelf de oude schuifpositie herstellen.
+function resetTijdSlider() {
+  tijdSlider.value = "15";
+  werkTijdWeergaveBij();
+}
+
+resetTijdSlider();
+window.addEventListener("pageshow", resetTijdSlider);
+
 tijdSlider.addEventListener("input", werkTijdWeergaveBij);
-werkTijdWeergaveBij();
 
 document.getElementById("instellingen-form").addEventListener("submit", (e) => {
   e.preventDefault();
