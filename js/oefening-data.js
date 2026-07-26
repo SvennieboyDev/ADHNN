@@ -258,6 +258,89 @@ function volledigeZinConfigBijvZwak(woordObj, geval) {
   if (geval === "accusatief") return bouw("Ik zie", "Ik zie", "");
 }
 
+// --- Bijvoeglijke naamwoorden: sterke verbuiging (zonder lidwoord) ---
+// Zonder lidwoord, aanwijzend of bezittelijk voornaamwoord ervoor neemt het
+// bijvoeglijk naamwoord zelf de sterkere, "lidwoord-achtige" uitgang over.
+// Onzijdig nominatief/accusatief blijft daarbij helemaal onverbogen ("goed").
+const STERK_BIJV_UITGANGEN = {
+  nominatief: { m: "e", v: "e", o: "" },
+  genitief: { m: "s", v: "er", o: "s" },
+  datief: { m: "en", v: "er", o: "en" },
+  accusatief: { m: "en", v: "e", o: "" },
+};
+
+function bijvNaamwoordVormSterk(adjectief, geslacht, geval) {
+  const uitgang = STERK_BIJV_UITGANGEN[geval][geslacht];
+  if (uitgang === "") return adjectief;
+  if (uitgang === "s") return adjectief + "s"; // medeklinker-uitgang: geen klinker-aanpassing nodig
+  if (uitgang === "er") return bijvVormenTabel()[adjectief].e.slice(0, -1) + "er"; // zelfde klinkerregel als bij -e
+  return bijvVormenTabel()[adjectief][uitgang]; // "e" of "en": identiek aan de zwakke vorm
+}
+
+function vormenBijvSterk(woordObj) {
+  const adjectief = kiesBijvoeglijkNaamwoord(woordObj);
+  const g = woordObj.geslacht;
+  const resultaat = {};
+  CASES.forEach((geval) => {
+    resultaat[geval] = bijvNaamwoordVormSterk(adjectief, g, geval);
+  });
+  return resultaat;
+}
+
+function titelBijvSterk(woordObj) {
+  return `${kiesBijvoeglijkNaamwoord(woordObj)} + ${woordObj.woord} (${woordObj.geslacht})`;
+}
+
+function zinsdelenBijvSterk(woordObj, geval) {
+  const noun = naamwoordVormVoorZin(woordObj, geval);
+  const hint = `bijvoeglijk naamwoord (zonder lidwoord): ${kiesBijvoeglijkNaamwoord(woordObj)}`;
+  if (geval === "nominatief") {
+    return { prefix: "", suffix: noun, hint };
+  }
+  if (geval === "genitief") {
+    return { prefix: "De naam", suffix: noun, hint };
+  }
+  if (geval === "datief") {
+    if (isPersoon(woordObj)) {
+      return { prefix: "Ik geef", suffix: `${noun} een geschenk`, hint };
+    }
+    return { prefix: "Hij spreekt van", suffix: noun, hint };
+  }
+  if (geval === "accusatief") {
+    return { prefix: "Ik zie", suffix: noun, hint };
+  }
+}
+
+// De moderne zin gebruikt (zoals modern Nederlands vereist) wél een lidwoord;
+// het historische antwoord laat het juist expres weg — dat is de kern van
+// deze categorie.
+function volledigeZinConfigBijvSterk(woordObj, geval) {
+  const g = woordObj.geslacht;
+  const modernDet = ARTIKELEN[g].nominatief;
+  const modernAdj = BIJV_ZWAK_VORMEN_ENKEL[kiesBijvoeglijkNaamwoord(woordObj)].e;
+  const modernNoun = woordObj.woord;
+  const noun = naamwoordVormVoorZin(woordObj, geval);
+
+  function bouw(modernPrefix, prefix, extraVast) {
+    const suffixDelen = [
+      { tekst: noun, kritiek: true },
+      ...(extraVast ? extraVast.split(" ").map((t) => ({ tekst: t, kritiek: false })) : []),
+    ];
+    const moderneZin = [modernPrefix, modernDet, modernAdj, modernNoun, extraVast]
+      .filter(Boolean)
+      .join(" ");
+    return { prefix, suffixDelen, moderneZin };
+  }
+
+  if (geval === "nominatief") return bouw("Hij geldt als", "Hij geldt als", "");
+  if (geval === "genitief") return bouw("De naam van", "De naam", "");
+  if (geval === "datief") {
+    if (isPersoon(woordObj)) return bouw("Ik geef", "Ik geef", "een geschenk");
+    return bouw("Hij spreekt van", "Hij spreekt van", "");
+  }
+  if (geval === "accusatief") return bouw("Ik zie", "Ik zie", "");
+}
+
 // --- Instellingen (opgeslagen in localStorage, gelden voor alle oefeningen) ---
 const INSTELLING_MODUS_KEY = "adhnn_modus";
 
