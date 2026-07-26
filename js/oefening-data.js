@@ -84,6 +84,15 @@ function vormen(woordObj) {
   };
 }
 
+function schudArray(array) {
+  const resultaat = array.slice();
+  for (let i = resultaat.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [resultaat[i], resultaat[j]] = [resultaat[j], resultaat[i]];
+  }
+  return resultaat;
+}
+
 async function laadWoorden() {
   const response = await fetch("data/naamwoorden.json");
   if (!response.ok) {
