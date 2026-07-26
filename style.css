@@ -148,6 +148,13 @@ h1 {
   text-align: left;
 }
 
+.woordkaart-ondertitel {
+  font-size: 0.9rem;
+  color: #6b6255;
+  font-style: italic;
+  margin: 0.3rem 0 0;
+}
+
 .skip-button {
   font-family: inherit;
   font-size: 0.95rem;

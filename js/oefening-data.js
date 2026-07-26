@@ -111,6 +111,142 @@ function moderneOnbepaaldeFrase(woordObj) {
   return `een ${woordObj.woord}`;
 }
 
+// --- Bijvoeglijke naamwoorden: zwakke verbuiging ---
+// Na een bepaald lidwoord, aanwijzend voornaamwoord of bezittelijk
+// voornaamwoord krijgt het bijvoeglijk naamwoord altijd de zwakke
+// verbuiging (-e in de nominatief, verder meestal -en).
+const ZWAK_BIJV_UITGANGEN = {
+  nominatief: { m: "e", v: "e", o: "e" },
+  genitief: { m: "en", v: "e", o: "en" },
+  datief: { m: "en", v: "e", o: "en" },
+  accusatief: { m: "en", v: "e", o: "e" },
+};
+
+// We oefenen steeds met hetzelfde bijvoeglijk naamwoord ("goed"), zodat de
+// oefening zich puur richt op de verbuiging en niet op steeds een ander
+// woord moeten herkennen.
+const BIJV_STAM = "goed";
+
+function bijvNaamwoordVorm(geslacht, geval) {
+  return BIJV_STAM + ZWAK_BIJV_UITGANGEN[geval][geslacht];
+}
+
+// De drie soorten bepalers die zwakke verbuiging veroorzaken. "modern" is de
+// (ongeslachtelijke) hedendaagse vorm; "tabel" is de historische verbuiging.
+const DETERMINER_PROFIELEN = {
+  bepaald: {
+    label: "het bepaalde lidwoord (de/het)",
+    modern: { m: "de", v: "de", o: "het" },
+    tabel: ARTIKELEN,
+  },
+  aanwijzend: {
+    label: "een aanwijzend voornaamwoord (die/dat)",
+    modern: { m: "die", v: "die", o: "dat" },
+    tabel: {
+      m: { nominatief: "die", genitief: "diens", datief: "dien", accusatief: "dien" },
+      v: { nominatief: "die", genitief: "dier", datief: "dier", accusatief: "die" },
+      o: { nominatief: "dat", genitief: "diens", datief: "dien", accusatief: "dat" },
+    },
+  },
+  bezittelijk: {
+    label: "een bezittelijk voornaamwoord (mijn)",
+    modern: { m: "mijn", v: "mijn", o: "mijn" },
+    tabel: {
+      m: { nominatief: "mijn", genitief: "mijns", datief: "mijnen", accusatief: "mijnen" },
+      v: { nominatief: "mijne", genitief: "mijner", datief: "mijner", accusatief: "mijne" },
+      o: { nominatief: "mijn", genitief: "mijns", datief: "mijnen", accusatief: "mijn" },
+    },
+  },
+};
+
+// Elk woord krijgt willekeurig één van de drie bepalers toegewezen, maar wel
+// steeds dezelfde voor alle 4 vragen van dat woord (anders klopt de context
+// niet meer). Het gekozen profiel wordt op het woordobject zelf onthouden.
+function kiesProfiel(woordObj) {
+  if (!woordObj._profielNaam) {
+    const namen = Object.keys(DETERMINER_PROFIELEN);
+    woordObj._profielNaam = namen[Math.floor(Math.random() * namen.length)];
+  }
+  return DETERMINER_PROFIELEN[woordObj._profielNaam];
+}
+
+// Het zelfstandig naamwoord zelf verbuigt exact zoals bij het bepaalde
+// lidwoord (zwakke/sterke genitief enz.).
+function naamwoordVormVoorZin(woordObj, geval) {
+  if (geval === "nominatief") return stamVorm(woordObj);
+  if (geval === "genitief") return genitiefVorm(woordObj);
+  return obliekeVorm(woordObj);
+}
+
+function vormenBijvZwak(woordObj) {
+  const profiel = kiesProfiel(woordObj);
+  const g = woordObj.geslacht;
+  const det = profiel.tabel[g];
+  const resultaat = {};
+  CASES.forEach((geval) => {
+    resultaat[geval] = `${det[geval]} ${bijvNaamwoordVorm(g, geval)}`;
+  });
+  // Bij het bepaalde lidwoord werd voor de datief onzijdig ook al de
+  // onverbogen vorm "het goede" gebruikt naast "den goeden".
+  if (woordObj._profielNaam === "bepaald" && g === "o") {
+    resultaat.datief = [resultaat.datief, `het ${bijvNaamwoordVorm(g, "nominatief")}`];
+  }
+  return resultaat;
+}
+
+function titelBijvZwak(woordObj) {
+  return `${BIJV_STAM} + ${woordObj.woord} (${woordObj.geslacht})`;
+}
+
+function ondertitelBijvZwak(woordObj) {
+  return `Gebruikt met ${kiesProfiel(woordObj).label}`;
+}
+
+function zinsdelenBijvZwak(woordObj, geval) {
+  const noun = naamwoordVormVoorZin(woordObj, geval);
+  const hint = `bijvoeglijk naamwoord: ${BIJV_STAM}`;
+  if (geval === "nominatief") {
+    return { prefix: "", suffix: noun, hint };
+  }
+  if (geval === "genitief") {
+    return { prefix: "de naam", suffix: noun, hint };
+  }
+  if (geval === "datief") {
+    if (isPersoon(woordObj)) {
+      return { prefix: "Ik geef", suffix: `${noun} een geschenk`, hint };
+    }
+    return { prefix: "Hij spreekt van", suffix: noun, hint };
+  }
+  if (geval === "accusatief") {
+    return { prefix: "Ik zie", suffix: noun, hint };
+  }
+}
+
+function volledigeZinConfigBijvZwak(woordObj, geval) {
+  const profiel = kiesProfiel(woordObj);
+  const g = woordObj.geslacht;
+  const modernDet = profiel.modern[g];
+  const modernAdj = "goede"; // modern Nederlands: altijd -e na de/het/die/dat/mijn e.d.
+  const modernNoun = woordObj.woord;
+  const noun = naamwoordVormVoorZin(woordObj, geval);
+
+  function bouw(modernPrefix, prefix, extra) {
+    const suffix = extra ? `${noun} ${extra}` : noun;
+    const moderneZin = [modernPrefix, modernDet, modernAdj, modernNoun, extra]
+      .filter(Boolean)
+      .join(" ");
+    return { prefix, suffix, moderneZin };
+  }
+
+  if (geval === "nominatief") return bouw("Dit is", "Dit is", "");
+  if (geval === "genitief") return bouw("de naam van", "de naam", "");
+  if (geval === "datief") {
+    if (isPersoon(woordObj)) return bouw("Ik geef", "Ik geef", "een geschenk");
+    return bouw("Hij spreekt van", "Hij spreekt van", "");
+  }
+  if (geval === "accusatief") return bouw("Ik zie", "Ik zie", "");
+}
+
 // --- Instellingen (opgeslagen in localStorage, gelden voor alle oefeningen) ---
 const INSTELLING_MODUS_KEY = "adhnn_modus";
 
