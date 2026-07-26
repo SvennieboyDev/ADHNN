@@ -237,6 +237,12 @@ h1 {
   text-align: center;
 }
 
+.eindscore-melding {
+  font-size: 0.95rem;
+  color: #6b6255;
+  text-align: center;
+}
+
 .foutmelding {
   max-width: 30rem;
   text-align: center;
@@ -338,4 +344,36 @@ h1 {
 
 .begin-button:hover {
   background-color: #d9ecd7;
+}
+
+.begin-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.tijd-instelling {
+  padding: 0.4rem 0.2rem;
+}
+
+#tijd-slider {
+  width: 100%;
+}
+
+.tijd-waarde {
+  text-align: center;
+  font-size: 1.2rem;
+  font-weight: bold;
+  margin-top: 0.5rem;
+}
+
+.tijd-waarschuwing {
+  text-align: center;
+  color: #b8453a;
+  font-size: 0.95rem;
+  margin-top: 0.5rem;
+}
+
+.oefen-header .tijd {
+  font-size: 1.1rem;
+  font-weight: bold;
 }

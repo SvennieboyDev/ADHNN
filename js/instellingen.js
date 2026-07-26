@@ -4,9 +4,30 @@ const volgende = params.get("volgende") || "index.html";
 const huidigeModus = haalModusOp();
 document.querySelector(`input[name="modus"][value="${huidigeModus}"]`).checked = true;
 
+const tijdSlider = document.getElementById("tijd-slider");
+const tijdWaardeGetal = document.getElementById("tijd-waarde-getal");
+const tijdWaarschuwing = document.getElementById("tijd-waarschuwing");
+const beginKnop = document.getElementById("begin-knop");
+
+tijdSlider.value = String(haalTijdslimietOp());
+
+function werkTijdWeergaveBij() {
+  const minuten = parseInt(tijdSlider.value, 10);
+  tijdWaardeGetal.textContent = minuten;
+  const geldig = minuten >= 1;
+  tijdWaarschuwing.hidden = geldig;
+  beginKnop.disabled = !geldig;
+}
+
+tijdSlider.addEventListener("input", werkTijdWeergaveBij);
+werkTijdWeergaveBij();
+
 document.getElementById("instellingen-form").addEventListener("submit", (e) => {
   e.preventDefault();
+  const minuten = parseInt(tijdSlider.value, 10);
+  if (minuten < 1) return;
   const gekozen = document.querySelector('input[name="modus"]:checked').value;
   zetModus(gekozen);
+  zetTijdslimiet(minuten);
   window.location.href = volgende;
 });

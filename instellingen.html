@@ -35,7 +35,17 @@
         </label>
       </fieldset>
 
-      <button type="submit" class="begin-button">Beginnen →</button>
+      <fieldset>
+        <legend>Hoe lang wil je oefenen?</legend>
+
+        <div class="tijd-instelling">
+          <input type="range" id="tijd-slider" min="0" max="30" step="1" value="15">
+          <div class="tijd-waarde"><span id="tijd-waarde-getal">15</span> minuten</div>
+          <div id="tijd-waarschuwing" class="tijd-waarschuwing" hidden>Kies minstens 1 minuut om te kunnen beginnen.</div>
+        </div>
+      </fieldset>
+
+      <button type="submit" class="begin-button" id="begin-knop">Beginnen →</button>
     </form>
   </main>
 
