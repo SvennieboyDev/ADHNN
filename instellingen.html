@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Instellingen — App der historische Nederlandse naamvallen</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="instellingen-screen">
+    <h1>Instellingen</h1>
+
+    <form id="instellingen-form" class="instellingen-form">
+      <fieldset>
+        <legend>Hoe wil je oefenen?</legend>
+
+        <label class="instelling-optie">
+          <input type="radio" name="modus" value="deel">
+          <span>
+            <strong>Alleen de naamvalsvorm invullen</strong>
+            <br>
+            Je vult enkel het ontbrekende stukje van de zin in.
+          </span>
+        </label>
+
+        <label class="instelling-optie">
+          <input type="radio" name="modus" value="zin">
+          <span>
+            <strong>De hele zin overtypen</strong>
+            <br>
+            Je ziet een modern Nederlandse zin en typt die volledig over met de juiste
+            historische naamvalsvormen. Kleine typefoutjes buiten de naamvalsvorm worden
+            niet afgekeurd.
+          </span>
+        </label>
+      </fieldset>
+
+      <button type="submit" class="begin-button">Beginnen →</button>
+    </form>
+  </main>
+
+  <script src="js/oefening-data.js"></script>
+  <script src="js/instellingen.js"></script>
+</body>
+</html>

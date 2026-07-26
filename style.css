@@ -241,3 +241,101 @@ h1 {
   max-width: 30rem;
   text-align: center;
 }
+
+.feedback.typo-opmerking {
+  color: #8a7a3a;
+}
+
+.moderne-zin {
+  font-size: 0.95rem;
+  color: #6b6255;
+  font-style: italic;
+  margin-bottom: 0.4rem;
+}
+
+.zin-input {
+  font-family: inherit;
+  font-size: 1.1rem;
+  padding: 0.5rem 0.7rem;
+  border: 2px solid #cfc3ac;
+  border-radius: 0.4rem;
+  width: 100%;
+  box-sizing: border-box;
+  background-color: #fff;
+  color: #2f2a24;
+}
+
+.zin-input.correct {
+  border-color: #4c8c4a;
+  background-color: #eaf5e9;
+}
+
+.zin-input.incorrect {
+  border-color: #b8453a;
+  background-color: #fbe9e7;
+}
+
+.instellingen-screen {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2rem;
+  overflow-y: auto;
+}
+
+.instellingen-form {
+  width: 100%;
+  max-width: 34rem;
+}
+
+.instellingen-form fieldset {
+  border: 2px solid #cfc3ac;
+  border-radius: 0.75rem;
+  padding: 1.2rem 1.4rem;
+  margin: 0 0 1.5rem;
+}
+
+.instellingen-form legend {
+  font-weight: bold;
+  padding: 0 0.4rem;
+}
+
+.instelling-optie {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.7rem;
+  padding: 0.8rem 0;
+  cursor: pointer;
+  border-bottom: 1px solid #e3dac2;
+}
+
+.instelling-optie:last-child {
+  border-bottom: none;
+}
+
+.instelling-optie input {
+  margin-top: 0.3rem;
+  flex-shrink: 0;
+}
+
+.instelling-optie span {
+  line-height: 1.4;
+}
+
+.begin-button {
+  font-family: inherit;
+  font-size: 1.15rem;
+  padding: 0.8rem 1.4rem;
+  border: 2px solid #4c8c4a;
+  border-radius: 0.5rem;
+  background-color: #eaf5e9;
+  color: #2f2a24;
+  cursor: pointer;
+  display: block;
+  margin: 0 auto;
+}
+
+.begin-button:hover {
+  background-color: #d9ecd7;
+}
