@@ -18,7 +18,7 @@ function zinsdelen(woordObj, geval) {
     return { prefix: "", suffix: "" };
   }
   if (geval === "genitief") {
-    return { prefix: "de naam", suffix: "" };
+    return { prefix: "De naam", suffix: "" };
   }
   if (geval === "datief") {
     if (isPersoon(woordObj)) {
@@ -39,7 +39,7 @@ function maakStandaardVolledigeZinConfig(moderneFraseFn) {
       return { prefix: "Dit is", suffix: "", moderneZin: `Dit is ${moderneFraseFn(woordObj)}` };
     }
     if (geval === "genitief") {
-      return { prefix: "de naam", suffix: "", moderneZin: `de naam van ${moderneFraseFn(woordObj)}` };
+      return { prefix: "De naam", suffix: "", moderneZin: `De naam van ${moderneFraseFn(woordObj)}` };
     }
     if (geval === "datief") {
       if (isPersoon(woordObj)) {
@@ -328,7 +328,7 @@ function startOefening({
         input.classList.add("incorrect");
         toonBtn.hidden = true;
         feedback.classList.remove("typo-opmerking");
-        feedback.textContent = "Antwoord getoond — dit telt niet als goed.";
+        feedback.textContent = "Antwoord getoond.";
         updateScore();
         naVoltooiing();
       };
