@@ -89,3 +89,147 @@ h1 {
   font-size: 1rem;
   color: #6b6255;
 }
+
+.oefen-screen {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2rem;
+  overflow-y: auto;
+}
+
+.oefen-header {
+  width: 100%;
+  max-width: 36rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.oefen-header .back-link {
+  margin-top: 0;
+}
+
+.score {
+  font-size: 1.1rem;
+  font-weight: bold;
+}
+
+.woordkaart {
+  width: 100%;
+  max-width: 36rem;
+  background-color: #fffdf8;
+  border: 2px solid #cfc3ac;
+  border-radius: 0.75rem;
+  padding: 1.5rem 2rem 2rem;
+}
+
+.woordkaart-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.woordkaart-top h1 {
+  font-size: 1.6rem;
+  margin: 0;
+  text-align: left;
+}
+
+.skip-button {
+  font-family: inherit;
+  font-size: 0.95rem;
+  background: none;
+  border: 2px solid #cfc3ac;
+  border-radius: 0.4rem;
+  padding: 0.5rem 0.9rem;
+  cursor: pointer;
+  color: #2f2a24;
+  white-space: nowrap;
+}
+
+.skip-button:hover {
+  background-color: #ece2cb;
+}
+
+.vraag {
+  margin-bottom: 1.3rem;
+}
+
+.vraag label {
+  display: block;
+  font-weight: bold;
+  margin-bottom: 0.4rem;
+}
+
+.zin {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  font-size: 1.15rem;
+}
+
+.antwoord-input {
+  font-family: inherit;
+  font-size: 1.1rem;
+  padding: 0.4rem 0.6rem;
+  border: 2px solid #cfc3ac;
+  border-radius: 0.4rem;
+  min-width: 10rem;
+  flex: 1 1 10rem;
+  background-color: #fff;
+  color: #2f2a24;
+}
+
+.antwoord-input.correct {
+  border-color: #4c8c4a;
+  background-color: #eaf5e9;
+}
+
+.antwoord-input.incorrect {
+  border-color: #b8453a;
+  background-color: #fbe9e7;
+}
+
+.feedback {
+  font-size: 0.95rem;
+  color: #b8453a;
+  min-height: 1.2rem;
+  margin-top: 0.3rem;
+}
+
+.volgende-button {
+  font-family: inherit;
+  font-size: 1.1rem;
+  padding: 0.7rem 1.2rem;
+  border: 2px solid #4c8c4a;
+  border-radius: 0.5rem;
+  background-color: #eaf5e9;
+  color: #2f2a24;
+  cursor: pointer;
+  display: block;
+  margin: 0.5rem auto 0;
+}
+
+.volgende-button[hidden] {
+  display: none;
+}
+
+.volgende-button:hover {
+  background-color: #d9ecd7;
+}
+
+.eindscore {
+  font-size: 1.3rem;
+  text-align: center;
+}
+
+.foutmelding {
+  max-width: 30rem;
+  text-align: center;
+}
