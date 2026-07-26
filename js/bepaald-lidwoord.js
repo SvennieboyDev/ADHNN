@@ -6,6 +6,7 @@ const LABELS = {
   accusatief: "Accusatief",
 };
 
+// "Deel"-modus: alleen het ontbrekende stukje van een vaste zin.
 function zinsdelen(woordObj, geval) {
   if (geval === "nominatief") {
     return { prefix: "", suffix: "" };
@@ -24,11 +25,62 @@ function zinsdelen(woordObj, geval) {
   }
 }
 
+// "Zin"-modus: dezelfde vaste tekst als hierboven (het historische skelet),
+// aangevuld met een moderne prefix om de moderne zin te kunnen tonen.
+function volledigeZinConfig(woordObj, geval) {
+  if (geval === "nominatief") {
+    return { modernPrefix: "Dit is", prefix: "Dit is", suffix: "" };
+  }
+  if (geval === "genitief") {
+    return { modernPrefix: "de naam van", prefix: "de naam", suffix: "" };
+  }
+  if (geval === "datief") {
+    if (isPersoon(woordObj)) {
+      return { modernPrefix: "Ik geef", prefix: "Ik geef", suffix: "een geschenk" };
+    }
+    return { modernPrefix: "Hij spreekt van", prefix: "Hij spreekt van", suffix: "" };
+  }
+  if (geval === "accusatief") {
+    return { modernPrefix: "Ik zie", prefix: "Ik zie", suffix: "" };
+  }
+}
+
 function normaliseer(tekst) {
   return tekst.trim().toLowerCase().replace(/\s+/g, " ");
 }
 
+// Beoordeelt een volledig overgetypte zin: het naamval-gedeelte (kritiek)
+// moet exact kloppen, kleine typefouten in de rest van de zin mogen.
+function beoordeelZin(waarde, config, kritiekVorm) {
+  const segmenten = [
+    ...(config.prefix ? config.prefix.split(" ") : []).map((t) => ({ tekst: t, kritiek: false })),
+    ...kritiekVorm.split(" ").map((t) => ({ tekst: t, kritiek: true })),
+    ...(config.suffix ? config.suffix.split(" ") : []).map((t) => ({ tekst: t, kritiek: false })),
+  ];
+  const actueleWoorden = normaliseer(waarde).split(" ").filter(Boolean);
+  if (actueleWoorden.length !== segmenten.length) {
+    return { juist: false, typo: false };
+  }
+  let typoGevonden = false;
+  for (let i = 0; i < segmenten.length; i++) {
+    const verwachtWoord = segmenten[i].tekst.toLowerCase();
+    const actueelWoord = actueleWoorden[i];
+    if (verwachtWoord === actueelWoord) continue;
+    if (segmenten[i].kritiek) {
+      return { juist: false, typo: false };
+    }
+    const afstand = bewerkingsafstand(verwachtWoord, actueelWoord);
+    if (afstand <= toegestaneTypoAfstand(verwachtWoord)) {
+      typoGevonden = true;
+      continue;
+    }
+    return { juist: false, typo: false };
+  }
+  return { juist: true, typo: typoGevonden };
+}
+
 let woorden = [];
+let modus = "deel";
 let idx = 0;
 let score = { correct: 0, total: 0 };
 let attempted = {};
@@ -81,46 +133,8 @@ function renderWoord(i) {
   top.appendChild(skipBtn);
   kaart.appendChild(top);
 
-  CASES.forEach((geval) => {
-    const { prefix, suffix } = zinsdelen(woordObj, geval);
-    const verwacht = antwoorden[geval];
-
-    const rij = document.createElement("div");
-    rij.className = "vraag";
-
-    const label = document.createElement("label");
-    label.textContent = LABELS[geval];
-    rij.appendChild(label);
-
-    const zin = document.createElement("div");
-    zin.className = "zin";
-    if (prefix) {
-      const prefixSpan = document.createElement("span");
-      prefixSpan.textContent = prefix;
-      zin.appendChild(prefixSpan);
-    }
-    const input = document.createElement("input");
-    input.type = "text";
-    input.className = "antwoord-input";
-    input.autocomplete = "off";
-    input.autocapitalize = "off";
-    input.spellcheck = false;
-    zin.appendChild(input);
-    inputsByCase[geval] = input;
-    if (suffix) {
-      const suffixSpan = document.createElement("span");
-      suffixSpan.textContent = suffix;
-      zin.appendChild(suffixSpan);
-    }
-    rij.appendChild(zin);
-
-    const feedback = document.createElement("div");
-    feedback.className = "feedback";
-    rij.appendChild(feedback);
-
-    kaart.appendChild(rij);
-
-    function beoordeel() {
+  function maakBeoordelaar(geval, input, feedback, checkFn) {
+    return function beoordeel() {
       if (correctDone[geval]) return;
       const waarde = input.value;
       if (normaliseer(waarde) === "") return;
@@ -131,13 +145,16 @@ function renderWoord(i) {
         score.total++;
       }
 
-      if (normaliseer(waarde) === normaliseer(verwacht)) {
+      const resultaat = checkFn(waarde);
+
+      if (resultaat.juist) {
         if (isEersteKeer) score.correct++;
         correctDone[geval] = true;
         input.classList.remove("incorrect");
         input.classList.add("correct");
         input.disabled = true;
-        feedback.textContent = "";
+        feedback.classList.toggle("typo-opmerking", !!resultaat.typo);
+        feedback.textContent = resultaat.typo ? "Goed! (kleine typefout genegeerd)" : "";
         updateScore();
         checkVolledig();
         const volgendeGeval = CASES.find((c) => !correctDone[c]);
@@ -149,10 +166,82 @@ function renderWoord(i) {
       } else {
         input.classList.remove("correct");
         input.classList.add("incorrect");
+        feedback.classList.remove("typo-opmerking");
         feedback.textContent = "Nog niet juist, probeer opnieuw.";
         updateScore();
       }
+    };
+  }
+
+  CASES.forEach((geval) => {
+    const verwacht = antwoorden[geval];
+
+    const rij = document.createElement("div");
+    rij.className = "vraag";
+
+    const label = document.createElement("label");
+    label.textContent = LABELS[geval];
+    rij.appendChild(label);
+
+    let input;
+    let checkFn;
+
+    if (modus === "zin") {
+      const config = volledigeZinConfig(woordObj, geval);
+      const moderneZinTekst = [config.modernPrefix, moderneFrase(woordObj), config.suffix]
+        .filter(Boolean)
+        .join(" ");
+
+      const moderneZinEl = document.createElement("div");
+      moderneZinEl.className = "moderne-zin";
+      moderneZinEl.textContent = moderneZinTekst;
+      rij.appendChild(moderneZinEl);
+
+      input = document.createElement("input");
+      input.type = "text";
+      input.className = "zin-input";
+      input.autocomplete = "off";
+      input.autocapitalize = "off";
+      input.spellcheck = false;
+      rij.appendChild(input);
+
+      checkFn = (waarde) => beoordeelZin(waarde, config, verwacht);
+    } else {
+      const { prefix, suffix } = zinsdelen(woordObj, geval);
+
+      const zin = document.createElement("div");
+      zin.className = "zin";
+      if (prefix) {
+        const prefixSpan = document.createElement("span");
+        prefixSpan.textContent = prefix;
+        zin.appendChild(prefixSpan);
+      }
+      input = document.createElement("input");
+      input.type = "text";
+      input.className = "antwoord-input";
+      input.autocomplete = "off";
+      input.autocapitalize = "off";
+      input.spellcheck = false;
+      zin.appendChild(input);
+      if (suffix) {
+        const suffixSpan = document.createElement("span");
+        suffixSpan.textContent = suffix;
+        zin.appendChild(suffixSpan);
+      }
+      rij.appendChild(zin);
+
+      checkFn = (waarde) => ({ juist: normaliseer(waarde) === normaliseer(verwacht), typo: false });
     }
+
+    inputsByCase[geval] = input;
+
+    const feedback = document.createElement("div");
+    feedback.className = "feedback";
+    rij.appendChild(feedback);
+
+    kaart.appendChild(rij);
+
+    const beoordeel = maakBeoordelaar(geval, input, feedback, checkFn);
 
     input.addEventListener("keydown", (e) => {
       if (e.key === "Enter") {
@@ -178,7 +267,7 @@ function renderWoord(i) {
   content.innerHTML = "";
   content.appendChild(kaart);
 
-  const eersteInput = kaart.querySelector(".antwoord-input");
+  const eersteInput = kaart.querySelector(".antwoord-input, .zin-input");
   if (eersteInput) eersteInput.focus();
 
   function checkVolledig() {
@@ -197,6 +286,7 @@ function renderWoord(i) {
 
 laadWoorden()
   .then((data) => {
+    modus = haalModusOp();
     woorden = schudArray(data);
     updateScore();
     renderWoord(idx);

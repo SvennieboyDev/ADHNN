@@ -78,6 +78,59 @@ function vormen(woordObj) {
   };
 }
 
+// Modern Nederlands kent geen naamvalsverbuiging meer: het lidwoord is altijd
+// de nominatiefvorm en het woord zelf blijft de kale stam.
+function moderneFrase(woordObj) {
+  return `${ARTIKELEN[woordObj.geslacht].nominatief} ${woordObj.woord}`;
+}
+
+// --- Instellingen (opgeslagen in localStorage, gelden voor alle oefeningen) ---
+const INSTELLING_MODUS_KEY = "adhnn_modus";
+
+function haalModusOp() {
+  return localStorage.getItem(INSTELLING_MODUS_KEY) === "zin" ? "zin" : "deel";
+}
+
+function zetModus(modus) {
+  localStorage.setItem(INSTELLING_MODUS_KEY, modus === "zin" ? "zin" : "deel");
+}
+
+// Damerau-Levenshtein-afstand (inclusief transposities zoals "gefe" i.p.v.
+// "geef") tussen twee losse woorden, gebruikt om kleine typefouten in het
+// niet-kritieke deel van een zin door de vingers te zien.
+function bewerkingsafstand(a, b) {
+  const al = a.length;
+  const bl = b.length;
+  const d = [];
+  for (let i = 0; i <= al; i++) d[i] = [i];
+  for (let j = 0; j <= bl; j++) d[0][j] = j;
+  for (let i = 1; i <= al; i++) {
+    for (let j = 1; j <= bl; j++) {
+      const kosten = a[i - 1] === b[j - 1] ? 0 : 1;
+      d[i][j] = Math.min(
+        d[i - 1][j] + 1,
+        d[i][j - 1] + 1,
+        d[i - 1][j - 1] + kosten
+      );
+      if (
+        i > 1 &&
+        j > 1 &&
+        a[i - 1] === b[j - 2] &&
+        a[i - 2] === b[j - 1]
+      ) {
+        d[i][j] = Math.min(d[i][j], d[i - 2][j - 2] + kosten);
+      }
+    }
+  }
+  return d[al][bl];
+}
+
+function toegestaneTypoAfstand(woord) {
+  if (woord.length <= 3) return 0;
+  if (woord.length <= 7) return 1;
+  return 2;
+}
+
 function schudArray(array) {
   const resultaat = array.slice();
   for (let i = resultaat.length - 1; i > 0; i--) {
