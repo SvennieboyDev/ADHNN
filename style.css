@@ -10,18 +10,82 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  text-align: center;
   padding: 2rem;
+  overflow-y: auto;
 }
 
 h1 {
   font-size: 2rem;
   max-width: 40rem;
-  margin-bottom: 1rem;
+  margin-bottom: 0.5rem;
+  text-align: center;
 }
 
 .author {
+  font-size: 1rem;
+  color: #6b6255;
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.options {
+  width: 100%;
+  max-width: 40rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  padding-bottom: 2rem;
+}
+
+.option-group h2 {
+  font-size: 1.4rem;
+  border-bottom: 2px solid #cfc3ac;
+  padding-bottom: 0.4rem;
+  margin-bottom: 1rem;
+}
+
+.option-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.option-button {
+  display: block;
+  font-family: inherit;
+  font-size: 1.1rem;
+  text-decoration: none;
+  color: #2f2a24;
+  background-color: #fffdf8;
+  border: 2px solid #cfc3ac;
+  border-radius: 0.5rem;
+  padding: 0.9rem 1.2rem;
+  text-align: center;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.option-button:hover,
+.option-button:focus {
+  background-color: #ece2cb;
+  border-color: #a89a78;
+}
+
+.empty-screen {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 2rem;
+}
+
+.empty-screen h1 {
+  font-size: 1.6rem;
+}
+
+.back-link {
+  margin-top: 2rem;
   font-size: 1rem;
   color: #6b6255;
 }
