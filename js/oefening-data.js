@@ -126,7 +126,12 @@ const ZWAK_BIJV_UITGANGEN = {
 // klinkerverdubbeling die wegvalt in een open lettergreep ("groot" -> "grote"),
 // medeklinkerverdubbeling na een korte klinker ("zwak" -> "zwakke") en
 // stemhebbend worden van -s/-f ("lief" -> "lieve")).
-const BIJV_ZWAK_VORMEN = {
+// Modern Nederlands schrijft die open lettergreep altijd met een enkele
+// klinker ("hele", "grote", "hoge"), maar in de oude spelling (van vóór de
+// afschaffing van de naamvallen) werd de dubbele klinker vaak nog gehandhaafd
+// ("heele", "groote", "hooge"). Welke van de twee gebruikt wordt is
+// instelbaar; de "enkel"-tabel is ook de vaste basis voor de moderne zin.
+const BIJV_ZWAK_VORMEN_ENKEL = {
   goed: { e: "goede", en: "goeden" },
   heel: { e: "hele", en: "helen" },
   groot: { e: "grote", en: "groten" },
@@ -138,11 +143,31 @@ const BIJV_ZWAK_VORMEN = {
   zwak: { e: "zwakke", en: "zwakken" },
   lief: { e: "lieve", en: "lieven" },
 };
-const BIJV_ZWAK_ADJECTIEVEN = Object.keys(BIJV_ZWAK_VORMEN);
+const BIJV_ZWAK_VORMEN_DUBBEL = {
+  ...BIJV_ZWAK_VORMEN_ENKEL,
+  heel: { e: "heele", en: "heelen" },
+  groot: { e: "groote", en: "grooten" },
+  hoog: { e: "hooge", en: "hoogen" },
+};
+const BIJV_ZWAK_ADJECTIEVEN = Object.keys(BIJV_ZWAK_VORMEN_ENKEL);
+
+const INSTELLING_KLINKER_KEY = "adhnn_klinkerspelling";
+
+function haalKlinkerspellingOp() {
+  return localStorage.getItem(INSTELLING_KLINKER_KEY) === "dubbel" ? "dubbel" : "enkel";
+}
+
+function zetKlinkerspelling(waarde) {
+  localStorage.setItem(INSTELLING_KLINKER_KEY, waarde === "dubbel" ? "dubbel" : "enkel");
+}
+
+function bijvVormenTabel() {
+  return haalKlinkerspellingOp() === "dubbel" ? BIJV_ZWAK_VORMEN_DUBBEL : BIJV_ZWAK_VORMEN_ENKEL;
+}
 
 function bijvNaamwoordVorm(adjectief, geslacht, geval) {
   const uitgang = ZWAK_BIJV_UITGANGEN[geval][geslacht];
-  return BIJV_ZWAK_VORMEN[adjectief][uitgang];
+  return bijvVormenTabel()[adjectief][uitgang];
 }
 
 // Elk woord krijgt willekeurig één bijvoeglijk naamwoord toegewezen, maar wel
@@ -185,7 +210,7 @@ function titelBijvZwak(woordObj) {
 
 function zinsdelenBijvZwak(woordObj, geval) {
   const noun = naamwoordVormVoorZin(woordObj, geval);
-  const hint = `bijvoeglijk naamwoord: ${kiesBijvoeglijkNaamwoord(woordObj)}`;
+  const hint = `lidwoord + bijvoeglijk naamwoord: ${kiesBijvoeglijkNaamwoord(woordObj)}`;
   if (geval === "nominatief") {
     return { prefix: "", suffix: noun, hint };
   }
@@ -203,19 +228,25 @@ function zinsdelenBijvZwak(woordObj, geval) {
   }
 }
 
+// In "hele zin"-modus moet het zelfstandig naamwoord (dat soms óók verandert,
+// bv. de genitief "paleizes") exact kloppen, net als de kritieke naamvalsvorm
+// zelf — alleen de echt vaste woorden eromheen krijgen typfout-coulance.
 function volledigeZinConfigBijvZwak(woordObj, geval) {
   const g = woordObj.geslacht;
   const modernDet = ARTIKELEN[g].nominatief; // modern lidwoord verbuigt niet
-  const modernAdj = BIJV_ZWAK_VORMEN[kiesBijvoeglijkNaamwoord(woordObj)].e; // modern: altijd -e
+  const modernAdj = BIJV_ZWAK_VORMEN_ENKEL[kiesBijvoeglijkNaamwoord(woordObj)].e; // modern: altijd enkele klinker, altijd -e
   const modernNoun = woordObj.woord;
   const noun = naamwoordVormVoorZin(woordObj, geval);
 
-  function bouw(modernPrefix, prefix, extra) {
-    const suffix = extra ? `${noun} ${extra}` : noun;
-    const moderneZin = [modernPrefix, modernDet, modernAdj, modernNoun, extra]
+  function bouw(modernPrefix, prefix, extraVast) {
+    const suffixDelen = [
+      { tekst: noun, kritiek: true },
+      ...(extraVast ? extraVast.split(" ").map((t) => ({ tekst: t, kritiek: false })) : []),
+    ];
+    const moderneZin = [modernPrefix, modernDet, modernAdj, modernNoun, extraVast]
       .filter(Boolean)
       .join(" ");
-    return { prefix, suffix, moderneZin };
+    return { prefix, suffixDelen, moderneZin };
   }
 
   if (geval === "nominatief") return bouw("Dit is", "Dit is", "");
