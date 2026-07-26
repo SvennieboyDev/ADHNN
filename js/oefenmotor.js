@@ -18,7 +18,7 @@ function zinsdelen(woordObj, geval) {
     return { prefix: "", suffix: "" };
   }
   if (geval === "genitief") {
-    return { prefix: "de naam", suffix: "" };
+    return { prefix: "De naam", suffix: "" };
   }
   if (geval === "datief") {
     if (isPersoon(woordObj)) {
@@ -39,7 +39,7 @@ function maakStandaardVolledigeZinConfig(moderneFraseFn) {
       return { prefix: "Dit is", suffix: "", moderneZin: `Dit is ${moderneFraseFn(woordObj)}` };
     }
     if (geval === "genitief") {
-      return { prefix: "de naam", suffix: "", moderneZin: `de naam van ${moderneFraseFn(woordObj)}` };
+      return { prefix: "De naam", suffix: "", moderneZin: `De naam van ${moderneFraseFn(woordObj)}` };
     }
     if (geval === "datief") {
       if (isPersoon(woordObj)) {
@@ -127,6 +127,17 @@ function beoordeelZin(waarde, config, kritiekVormen) {
   return besteResultaat;
 }
 
+// Bouwt de volledige zin op basis van de (eerste) juiste kandidaat, voor de
+// "antwoord tonen"-knop in zin-modus.
+function volledigeZinTekst(config, kritiekVormen) {
+  const segmenten = [
+    ...segmentenVan(config.prefixDelen, config.prefix),
+    ...alsLijst(kritiekVormen)[0].split(" ").map((t) => ({ tekst: t })),
+    ...segmentenVan(config.suffixDelen, config.suffix),
+  ];
+  return segmenten.map((s) => s.tekst).join(" ");
+}
+
 function startOefening({
   vormenFn,
   moderneFraseFn,
@@ -141,6 +152,7 @@ function startOefening({
   let score = { correct: 0, total: 0 };
   let attempted = {};
   let correctDone = {};
+  let opgegeven = {};
   let enterHandler = null;
   let tijdResterend = 0;
   let tijdIsOm = false;
@@ -202,7 +214,9 @@ function startOefening({
   function renderWoord(i) {
     attempted = {};
     correctDone = {};
+    opgegeven = {};
     const inputsByCase = {};
+    const toonBtnByCase = {};
     if (enterHandler) {
       document.removeEventListener("keydown", enterHandler);
       enterHandler = null;
@@ -252,9 +266,19 @@ function startOefening({
     top.appendChild(skipBtn);
     kaart.appendChild(top);
 
+    function naVoltooiing() {
+      checkVolledig();
+      const volgendeGeval = CASES.find((c) => !correctDone[c] && !opgegeven[c]);
+      if (volgendeGeval) {
+        inputsByCase[volgendeGeval].focus();
+      } else if (!volgendeBtn.hidden) {
+        volgendeBtn.focus();
+      }
+    }
+
     function maakBeoordelaar(geval, input, feedback, checkFn) {
       return function beoordeel() {
-        if (correctDone[geval]) return;
+        if (correctDone[geval] || opgegeven[geval]) return;
         const waarde = input.value;
         if (normaliseer(waarde) === "") return;
 
@@ -272,16 +296,11 @@ function startOefening({
           input.classList.remove("incorrect");
           input.classList.add("correct");
           input.disabled = true;
+          toonBtnByCase[geval].hidden = true;
           feedback.classList.toggle("typo-opmerking", !!resultaat.typo);
           feedback.textContent = resultaat.typo ? "Goed! (kleine typefout genegeerd)" : "";
           updateScore();
-          checkVolledig();
-          const volgendeGeval = CASES.find((c) => !correctDone[c]);
-          if (volgendeGeval) {
-            inputsByCase[volgendeGeval].focus();
-          } else if (!volgendeBtn.hidden) {
-            volgendeBtn.focus();
-          }
+          naVoltooiing();
         } else {
           input.classList.remove("correct");
           input.classList.add("incorrect");
@@ -289,6 +308,29 @@ function startOefening({
           feedback.textContent = "Nog niet juist, probeer opnieuw.";
           updateScore();
         }
+      };
+    }
+
+    function maakToonAntwoord(geval, input, feedback, toonBtn, antwoordTekstFn) {
+      return function toonAntwoord() {
+        if (correctDone[geval] || opgegeven[geval]) return;
+
+        const isEersteKeer = !attempted[geval];
+        if (isEersteKeer) {
+          attempted[geval] = true;
+          score.total++;
+        }
+
+        opgegeven[geval] = true;
+        input.value = antwoordTekstFn();
+        input.disabled = true;
+        input.classList.remove("correct");
+        input.classList.add("incorrect");
+        toonBtn.hidden = true;
+        feedback.classList.remove("typo-opmerking");
+        feedback.textContent = "Antwoord getoond.";
+        updateScore();
+        naVoltooiing();
       };
     }
 
@@ -304,6 +346,7 @@ function startOefening({
 
       let input;
       let checkFn;
+      let antwoordTekstFn;
 
       if (modus === "zin") {
         const config = volledigeZinConfigFn(woordObj, geval);
@@ -322,6 +365,7 @@ function startOefening({
         rij.appendChild(input);
 
         checkFn = (waarde) => beoordeelZin(waarde, config, verwacht);
+        antwoordTekstFn = () => volledigeZinTekst(config, verwacht);
       } else {
         const { prefix, suffix, hint } = zinsdelenFn(woordObj, geval);
 
@@ -357,9 +401,17 @@ function startOefening({
           juist: alsLijst(verwacht).some((optie) => normaliseer(waarde) === normaliseer(optie)),
           typo: false,
         });
+        antwoordTekstFn = () => alsLijst(verwacht)[0];
       }
 
       inputsByCase[geval] = input;
+
+      const toonBtn = document.createElement("button");
+      toonBtn.type = "button";
+      toonBtn.className = "toon-antwoord-btn";
+      toonBtn.textContent = "Antwoord tonen";
+      rij.appendChild(toonBtn);
+      toonBtnByCase[geval] = toonBtn;
 
       const feedback = document.createElement("div");
       feedback.className = "feedback";
@@ -368,6 +420,7 @@ function startOefening({
       kaart.appendChild(rij);
 
       const beoordeel = maakBeoordelaar(geval, input, feedback, checkFn);
+      const toonAntwoord = maakToonAntwoord(geval, input, feedback, toonBtn, antwoordTekstFn);
 
       input.addEventListener("keydown", (e) => {
         if (e.key === "Enter") {
@@ -377,6 +430,7 @@ function startOefening({
         }
       });
       input.addEventListener("blur", beoordeel);
+      toonBtn.addEventListener("click", toonAntwoord);
     });
 
     const volgendeBtn = document.createElement("button");
@@ -396,7 +450,7 @@ function startOefening({
     if (eersteInput) eersteInput.focus();
 
     function checkVolledig() {
-      if (CASES.every((c) => correctDone[c])) {
+      if (CASES.every((c) => correctDone[c] || opgegeven[c])) {
         volgendeBtn.hidden = false;
         enterHandler = (e) => {
           if (e.key === "Enter") {

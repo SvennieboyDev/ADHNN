@@ -215,7 +215,7 @@ function zinsdelenBijvZwak(woordObj, geval) {
     return { prefix: "", suffix: noun, hint };
   }
   if (geval === "genitief") {
-    return { prefix: "de naam", suffix: noun, hint };
+    return { prefix: "De naam", suffix: noun, hint };
   }
   if (geval === "datief") {
     if (isPersoon(woordObj)) {
@@ -250,7 +250,7 @@ function volledigeZinConfigBijvZwak(woordObj, geval) {
   }
 
   if (geval === "nominatief") return bouw("Dit is", "Dit is", "");
-  if (geval === "genitief") return bouw("de naam van", "de naam", "");
+  if (geval === "genitief") return bouw("De naam van", "De naam", "");
   if (geval === "datief") {
     if (isPersoon(woordObj)) return bouw("Ik geef", "Ik geef", "een geschenk");
     return bouw("Hij spreekt van", "Hij spreekt van", "");

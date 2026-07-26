@@ -218,6 +218,27 @@ h1 {
   margin-top: 0.3rem;
 }
 
+.toon-antwoord-btn {
+  font-family: inherit;
+  font-size: 0.85rem;
+  background: none;
+  border: none;
+  color: #6b6255;
+  text-decoration: underline;
+  cursor: pointer;
+  padding: 0.3rem 0;
+  display: block;
+  margin-left: auto;
+}
+
+.toon-antwoord-btn:hover {
+  color: #2f2a24;
+}
+
+.toon-antwoord-btn[hidden] {
+  display: none;
+}
+
 .volgende-button {
   font-family: inherit;
   font-size: 1.1rem;
@@ -299,7 +320,7 @@ h1 {
 
 .instellingen-form {
   width: 100%;
-  max-width: 34rem;
+  max-width: 36rem;
 }
 
 .instellingen-form fieldset {
