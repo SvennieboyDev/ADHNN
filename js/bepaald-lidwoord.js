@@ -86,12 +86,61 @@ let score = { correct: 0, total: 0 };
 let attempted = {};
 let correctDone = {};
 let enterHandler = null;
+let tijdResterend = 0;
+let tijdIsOm = false;
+let tijdInterval = null;
 
 const content = document.getElementById("oefen-content");
 const scoreEl = document.getElementById("score");
+const tijdEl = document.getElementById("tijd");
 
 function updateScore() {
   scoreEl.textContent = `${score.correct}/${score.total}`;
+}
+
+function formatTijd(seconden) {
+  const m = Math.floor(seconden / 60);
+  const s = seconden % 60;
+  return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+}
+
+function updateTijdWeergave() {
+  tijdEl.textContent = formatTijd(Math.max(tijdResterend, 0));
+}
+
+function startTimer(minuten) {
+  tijdResterend = minuten * 60;
+  updateTijdWeergave();
+  tijdInterval = setInterval(() => {
+    tijdResterend--;
+    updateTijdWeergave();
+    if (tijdResterend <= 0) {
+      clearInterval(tijdInterval);
+      tijdIsOm = true;
+    }
+  }, 1000);
+}
+
+function gaNaarVolgendeWoord() {
+  idx++;
+  if (tijdIsOm) {
+    toonTijdIsOmScherm();
+  } else {
+    renderWoord(idx);
+  }
+}
+
+function toonTijdIsOmScherm() {
+  content.innerHTML = `
+    <div class="woordkaart">
+      <h1>Tijd is om!</h1>
+      <p class="eindscore">Score: ${score.correct}/${score.total}</p>
+      <p class="eindscore-melding">Je wordt teruggestuurd naar het startscherm...</p>
+    </div>
+  `;
+  setTimeout(() => {
+    window.location.href = "index.html";
+  }, 4000);
 }
 
 function renderWoord(i) {
@@ -104,6 +153,7 @@ function renderWoord(i) {
   }
 
   if (i >= woorden.length) {
+    if (tijdInterval) clearInterval(tijdInterval);
     content.innerHTML = `
       <div class="woordkaart">
         <h1>Klaar!</h1>
@@ -127,8 +177,7 @@ function renderWoord(i) {
   skipBtn.className = "skip-button";
   skipBtn.textContent = "Woord overslaan";
   skipBtn.addEventListener("click", () => {
-    idx++;
-    renderWoord(idx);
+    gaNaarVolgendeWoord();
   });
   top.appendChild(skipBtn);
   kaart.appendChild(top);
@@ -259,8 +308,7 @@ function renderWoord(i) {
   volgendeBtn.textContent = "Volgende woord →";
   volgendeBtn.hidden = true;
   volgendeBtn.addEventListener("click", () => {
-    idx++;
-    renderWoord(idx);
+    gaNaarVolgendeWoord();
   });
   kaart.appendChild(volgendeBtn);
 
@@ -275,8 +323,7 @@ function renderWoord(i) {
       volgendeBtn.hidden = false;
       enterHandler = (e) => {
         if (e.key === "Enter") {
-          idx++;
-          renderWoord(idx);
+          gaNaarVolgendeWoord();
         }
       };
       document.addEventListener("keydown", enterHandler);
@@ -290,6 +337,7 @@ laadWoorden()
     woorden = schudArray(data);
     updateScore();
     renderWoord(idx);
+    startTimer(haalTijdslimietOp());
   })
   .catch(() => {
     content.innerHTML = `<p class="foutmelding">De woordenlijst kon niet geladen worden. Bekijk deze pagina via GitHub Pages of een lokale server (niet als los bestand).</p>`;

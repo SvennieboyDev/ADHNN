@@ -95,6 +95,18 @@ function zetModus(modus) {
   localStorage.setItem(INSTELLING_MODUS_KEY, modus === "zin" ? "zin" : "deel");
 }
 
+const INSTELLING_TIJD_KEY = "adhnn_tijdslimiet_minuten";
+
+function haalTijdslimietOp() {
+  const waarde = parseInt(localStorage.getItem(INSTELLING_TIJD_KEY), 10);
+  if (!Number.isFinite(waarde) || waarde < 1 || waarde > 30) return 15;
+  return waarde;
+}
+
+function zetTijdslimiet(minuten) {
+  localStorage.setItem(INSTELLING_TIJD_KEY, String(minuten));
+}
+
 // Damerau-Levenshtein-afstand (inclusief transposities zoals "gefe" i.p.v.
 // "geef") tussen twee losse woorden, gebruikt om kleine typefouten in het
 // niet-kritieke deel van een zin door de vingers te zien.
@@ -126,7 +138,7 @@ function bewerkingsafstand(a, b) {
 }
 
 function toegestaneTypoAfstand(woord) {
-  if (woord.length <= 3) return 0;
+  if (woord.length <= 2) return 0;
   if (woord.length <= 7) return 1;
   return 2;
 }
