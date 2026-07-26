@@ -84,6 +84,33 @@ function moderneFrase(woordObj) {
   return `${ARTIKELEN[woordObj.geslacht].nominatief} ${woordObj.woord}`;
 }
 
+const ONBEPAALD_ARTIKELEN = {
+  m: { nominatief: "een", genitief: "eens", datief: "eenen", accusatief: "eenen" },
+  v: { nominatief: "eene", genitief: "eener", datief: "eener", accusatief: "eene" },
+  o: { nominatief: "een", genitief: "eens", datief: "eenen", accusatief: "een" },
+};
+
+// Het zelfstandig naamwoord zelf verbuigt precies hetzelfde als bij het
+// bepaalde lidwoord (zwakke/sterke genitief enz.); alleen het lidwoord
+// verandert.
+function vormenOnbepaald(woordObj) {
+  const artikelen = ONBEPAALD_ARTIKELEN[woordObj.geslacht];
+  const gen = genitiefVorm(woordObj);
+  const oblique = obliekeVorm(woordObj);
+  return {
+    nominatief: `${artikelen.nominatief} ${stamVorm(woordObj)}`,
+    genitief: `${artikelen.genitief} ${gen}`,
+    datief: `${artikelen.datief} ${oblique}`,
+    accusatief: `${artikelen.accusatief} ${oblique}`,
+  };
+}
+
+// Modern Nederlands kent nog maar één onbepaald lidwoord voor alle
+// geslachten: "een".
+function moderneOnbepaaldeFrase(woordObj) {
+  return `een ${woordObj.woord}`;
+}
+
 // --- Instellingen (opgeslagen in localStorage, gelden voor alle oefeningen) ---
 const INSTELLING_MODUS_KEY = "adhnn_modus";
 

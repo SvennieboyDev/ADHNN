@@ -7,9 +7,20 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <main class="empty-screen">
-    <h1>Het onbepaalde lidwoord (een)</h1>
-    <a class="back-link" href="index.html">&larr; Terug naar het startscherm</a>
+  <main class="oefen-screen">
+    <h2 class="categorie-titel">Het onbepaalde lidwoord (een)</h2>
+
+    <div class="oefen-header">
+      <a class="back-link" href="index.html">&larr; Terug naar het startscherm</a>
+      <div class="tijd">Tijd: <span id="tijd">--:--</span></div>
+      <div class="score">Score: <span id="score">0/0</span></div>
+    </div>
+
+    <div id="oefen-content"></div>
   </main>
+
+  <script src="js/oefening-data.js"></script>
+  <script src="js/oefenmotor.js"></script>
+  <script src="js/onbepaald-lidwoord.js"></script>
 </body>
 </html>
