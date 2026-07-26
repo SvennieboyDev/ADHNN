@@ -1,8 +1,8 @@
 // Generieke motor voor de naamval-oefeningen (bepaald lidwoord, onbepaald
-// lidwoord, ...). Elke oefenpagina roept startOefening() aan met de
-// vervoegingsfuncties die specifiek zijn voor die categorie; de rest van de
-// mechaniek (deel/zin-modus, typfouttolerantie, timer, score, focus) is
-// identiek voor alle categorieën.
+// lidwoord, bijvoeglijke naamwoorden, ...). Elke oefenpagina roept
+// startOefening() aan met de vervoegingsfuncties die specifiek zijn voor die
+// categorie; de rest van de mechaniek (deel/zin-modus, typfouttolerantie,
+// timer, score, focus) is identiek voor alle categorieën.
 
 const CASES = ["nominatief", "genitief", "datief", "accusatief"];
 const LABELS = {
@@ -12,7 +12,7 @@ const LABELS = {
   accusatief: "Accusatief",
 };
 
-// "Deel"-modus: alleen het ontbrekende stukje van een vaste zin.
+// "Deel"-modus (standaard): alleen het ontbrekende stukje van een vaste zin.
 function zinsdelen(woordObj, geval) {
   if (geval === "nominatief") {
     return { prefix: "", suffix: "" };
@@ -31,33 +31,52 @@ function zinsdelen(woordObj, geval) {
   }
 }
 
-// "Zin"-modus: dezelfde vaste tekst als hierboven (het historische skelet),
-// aangevuld met een moderne prefix om de moderne zin te kunnen tonen.
-function volledigeZinConfig(woordObj, geval) {
-  if (geval === "nominatief") {
-    return { modernPrefix: "Dit is", prefix: "Dit is", suffix: "" };
-  }
-  if (geval === "genitief") {
-    return { modernPrefix: "de naam van", prefix: "de naam", suffix: "" };
-  }
-  if (geval === "datief") {
-    if (isPersoon(woordObj)) {
-      return { modernPrefix: "Ik geef", prefix: "Ik geef", suffix: "een geschenk" };
+// "Zin"-modus (standaard): dezelfde vaste tekst als hierboven (het
+// historische skelet), aangevuld met de moderne zin.
+function maakStandaardVolledigeZinConfig(moderneFraseFn) {
+  return function (woordObj, geval) {
+    if (geval === "nominatief") {
+      return { prefix: "Dit is", suffix: "", moderneZin: `Dit is ${moderneFraseFn(woordObj)}` };
     }
-    return { modernPrefix: "Hij spreekt van", prefix: "Hij spreekt van", suffix: "" };
-  }
-  if (geval === "accusatief") {
-    return { modernPrefix: "Ik zie", prefix: "Ik zie", suffix: "" };
-  }
+    if (geval === "genitief") {
+      return { prefix: "de naam", suffix: "", moderneZin: `de naam van ${moderneFraseFn(woordObj)}` };
+    }
+    if (geval === "datief") {
+      if (isPersoon(woordObj)) {
+        return {
+          prefix: "Ik geef",
+          suffix: "een geschenk",
+          moderneZin: `Ik geef ${moderneFraseFn(woordObj)} een geschenk`,
+        };
+      }
+      return {
+        prefix: "Hij spreekt van",
+        suffix: "",
+        moderneZin: `Hij spreekt van ${moderneFraseFn(woordObj)}`,
+      };
+    }
+    if (geval === "accusatief") {
+      return { prefix: "Ik zie", suffix: "", moderneZin: `Ik zie ${moderneFraseFn(woordObj)}` };
+    }
+  };
+}
+
+function standaardTitel(woordObj) {
+  return `${woordObj.woord} (${woordObj.geslacht})`;
 }
 
 function normaliseer(tekst) {
   return tekst.trim().toLowerCase().replace(/\s+/g, " ");
 }
 
-// Beoordeelt een volledig overgetypte zin: het naamval-gedeelte (kritiek)
-// moet exact kloppen, kleine typefouten in de rest van de zin mogen.
-function beoordeelZin(waarde, config, kritiekVorm) {
+function alsLijst(waarde) {
+  return Array.isArray(waarde) ? waarde : [waarde];
+}
+
+// Beoordeelt één kandidaat-antwoord voor een volledig overgetypte zin: het
+// naamval-gedeelte (kritiek) moet exact kloppen, kleine typefouten in de
+// rest van de zin mogen.
+function beoordeelZinKandidaat(waarde, config, kritiekVorm) {
   const segmenten = [
     ...(config.prefix ? config.prefix.split(" ") : []).map((t) => ({ tekst: t, kritiek: false })),
     ...kritiekVorm.split(" ").map((t) => ({ tekst: t, kritiek: true })),
@@ -85,7 +104,27 @@ function beoordeelZin(waarde, config, kritiekVorm) {
   return { juist: true, typo: typoGevonden };
 }
 
-function startOefening({ vormenFn, moderneFraseFn }) {
+// Sommige vragen hebben meer dan één historisch aanvaard antwoord (bv.
+// "den goeden" naast het ook toegestane "het goede"). Probeer elke
+// kandidaat en geef de beste match terug.
+function beoordeelZin(waarde, config, kritiekVormen) {
+  let besteResultaat = { juist: false, typo: false };
+  for (const kandidaat of alsLijst(kritiekVormen)) {
+    const resultaat = beoordeelZinKandidaat(waarde, config, kandidaat);
+    if (resultaat.juist && !resultaat.typo) return resultaat;
+    if (resultaat.juist) besteResultaat = resultaat;
+  }
+  return besteResultaat;
+}
+
+function startOefening({
+  vormenFn,
+  moderneFraseFn,
+  zinsdelenFn = zinsdelen,
+  volledigeZinConfigFn = maakStandaardVolledigeZinConfig(moderneFraseFn),
+  titelFn = standaardTitel,
+  ondertitelFn = () => null,
+}) {
   let woorden = [];
   let modus = "deel";
   let idx = 0;
@@ -178,7 +217,21 @@ function startOefening({ vormenFn, moderneFraseFn }) {
 
     const top = document.createElement("div");
     top.className = "woordkaart-top";
-    top.innerHTML = `<h1>${woordObj.woord} (${woordObj.geslacht})</h1>`;
+
+    const titelBlok = document.createElement("div");
+    titelBlok.className = "woordkaart-titel-blok";
+    const titelEl = document.createElement("h1");
+    titelEl.textContent = titelFn(woordObj);
+    titelBlok.appendChild(titelEl);
+    const ondertitelTekst = ondertitelFn(woordObj);
+    if (ondertitelTekst) {
+      const ondertitelEl = document.createElement("p");
+      ondertitelEl.className = "woordkaart-ondertitel";
+      ondertitelEl.textContent = ondertitelTekst;
+      titelBlok.appendChild(ondertitelEl);
+    }
+    top.appendChild(titelBlok);
+
     const skipBtn = document.createElement("button");
     skipBtn.type = "button";
     skipBtn.className = "skip-button";
@@ -243,14 +296,11 @@ function startOefening({ vormenFn, moderneFraseFn }) {
       let checkFn;
 
       if (modus === "zin") {
-        const config = volledigeZinConfig(woordObj, geval);
-        const moderneZinTekst = [config.modernPrefix, moderneFraseFn(woordObj), config.suffix]
-          .filter(Boolean)
-          .join(" ");
+        const config = volledigeZinConfigFn(woordObj, geval);
 
         const moderneZinEl = document.createElement("div");
         moderneZinEl.className = "moderne-zin";
-        moderneZinEl.textContent = moderneZinTekst;
+        moderneZinEl.textContent = config.moderneZin;
         rij.appendChild(moderneZinEl);
 
         input = document.createElement("input");
@@ -263,7 +313,14 @@ function startOefening({ vormenFn, moderneFraseFn }) {
 
         checkFn = (waarde) => beoordeelZin(waarde, config, verwacht);
       } else {
-        const { prefix, suffix } = zinsdelen(woordObj, geval);
+        const { prefix, suffix, hint } = zinsdelenFn(woordObj, geval);
+
+        if (hint) {
+          const hintEl = document.createElement("div");
+          hintEl.className = "moderne-zin";
+          hintEl.textContent = hint;
+          rij.appendChild(hintEl);
+        }
 
         const zin = document.createElement("div");
         zin.className = "zin";
@@ -286,7 +343,10 @@ function startOefening({ vormenFn, moderneFraseFn }) {
         }
         rij.appendChild(zin);
 
-        checkFn = (waarde) => ({ juist: normaliseer(waarde) === normaliseer(verwacht), typo: false });
+        checkFn = (waarde) => ({
+          juist: alsLijst(verwacht).some((optie) => normaliseer(waarde) === normaliseer(optie)),
+          typo: false,
+        });
       }
 
       inputsByCase[geval] = input;

@@ -111,6 +111,122 @@ function moderneOnbepaaldeFrase(woordObj) {
   return `een ${woordObj.woord}`;
 }
 
+// --- Bijvoeglijke naamwoorden: zwakke verbuiging ---
+// Na een bepaald lidwoord krijgt het bijvoeglijk naamwoord altijd de
+// zwakke verbuiging (-e in de nominatief, verder meestal -en).
+const ZWAK_BIJV_UITGANGEN = {
+  nominatief: { m: "e", v: "e", o: "e" },
+  genitief: { m: "en", v: "e", o: "en" },
+  datief: { m: "en", v: "e", o: "en" },
+  accusatief: { m: "en", v: "e", o: "e" },
+};
+
+// Een handvol bijvoeglijke naamwoorden, met hun al correct afgeleide
+// -e en -en vorm (rekening houdend met de gewone Nederlandse spellingregels:
+// klinkerverdubbeling die wegvalt in een open lettergreep ("groot" -> "grote"),
+// medeklinkerverdubbeling na een korte klinker ("zwak" -> "zwakke") en
+// stemhebbend worden van -s/-f ("lief" -> "lieve")).
+const BIJV_ZWAK_VORMEN = {
+  goed: { e: "goede", en: "goeden" },
+  heel: { e: "hele", en: "helen" },
+  groot: { e: "grote", en: "groten" },
+  hoog: { e: "hoge", en: "hogen" },
+  klein: { e: "kleine", en: "kleinen" },
+  sterk: { e: "sterke", en: "sterken" },
+  rijk: { e: "rijke", en: "rijken" },
+  oud: { e: "oude", en: "ouden" },
+  zwak: { e: "zwakke", en: "zwakken" },
+  lief: { e: "lieve", en: "lieven" },
+};
+const BIJV_ZWAK_ADJECTIEVEN = Object.keys(BIJV_ZWAK_VORMEN);
+
+function bijvNaamwoordVorm(adjectief, geslacht, geval) {
+  const uitgang = ZWAK_BIJV_UITGANGEN[geval][geslacht];
+  return BIJV_ZWAK_VORMEN[adjectief][uitgang];
+}
+
+// Elk woord krijgt willekeurig één bijvoeglijk naamwoord toegewezen, maar wel
+// steeds hetzelfde voor alle 4 vragen van dat woord. De keuze wordt op het
+// woordobject zelf onthouden.
+function kiesBijvoeglijkNaamwoord(woordObj) {
+  if (!woordObj._bijvNaamwoord) {
+    woordObj._bijvNaamwoord = BIJV_ZWAK_ADJECTIEVEN[Math.floor(Math.random() * BIJV_ZWAK_ADJECTIEVEN.length)];
+  }
+  return woordObj._bijvNaamwoord;
+}
+
+// Het zelfstandig naamwoord zelf verbuigt exact zoals bij het bepaalde
+// lidwoord (zwakke/sterke genitief enz.).
+function naamwoordVormVoorZin(woordObj, geval) {
+  if (geval === "nominatief") return stamVorm(woordObj);
+  if (geval === "genitief") return genitiefVorm(woordObj);
+  return obliekeVorm(woordObj);
+}
+
+function vormenBijvZwak(woordObj) {
+  const adjectief = kiesBijvoeglijkNaamwoord(woordObj);
+  const g = woordObj.geslacht;
+  const det = ARTIKELEN[g];
+  const resultaat = {};
+  CASES.forEach((geval) => {
+    resultaat[geval] = `${det[geval]} ${bijvNaamwoordVorm(adjectief, g, geval)}`;
+  });
+  // Bij de datief onzijdig werd ook al de onverbogen vorm ("het goede")
+  // gebruikt naast de volledig verbogen vorm ("den goeden").
+  if (g === "o") {
+    resultaat.datief = [resultaat.datief, `het ${bijvNaamwoordVorm(adjectief, g, "nominatief")}`];
+  }
+  return resultaat;
+}
+
+function titelBijvZwak(woordObj) {
+  return `${kiesBijvoeglijkNaamwoord(woordObj)} + ${woordObj.woord} (${woordObj.geslacht})`;
+}
+
+function zinsdelenBijvZwak(woordObj, geval) {
+  const noun = naamwoordVormVoorZin(woordObj, geval);
+  const hint = `bijvoeglijk naamwoord: ${kiesBijvoeglijkNaamwoord(woordObj)}`;
+  if (geval === "nominatief") {
+    return { prefix: "", suffix: noun, hint };
+  }
+  if (geval === "genitief") {
+    return { prefix: "de naam", suffix: noun, hint };
+  }
+  if (geval === "datief") {
+    if (isPersoon(woordObj)) {
+      return { prefix: "Ik geef", suffix: `${noun} een geschenk`, hint };
+    }
+    return { prefix: "Hij spreekt van", suffix: noun, hint };
+  }
+  if (geval === "accusatief") {
+    return { prefix: "Ik zie", suffix: noun, hint };
+  }
+}
+
+function volledigeZinConfigBijvZwak(woordObj, geval) {
+  const g = woordObj.geslacht;
+  const modernDet = ARTIKELEN[g].nominatief; // modern lidwoord verbuigt niet
+  const modernAdj = BIJV_ZWAK_VORMEN[kiesBijvoeglijkNaamwoord(woordObj)].e; // modern: altijd -e
+  const modernNoun = woordObj.woord;
+  const noun = naamwoordVormVoorZin(woordObj, geval);
+
+  function bouw(modernPrefix, prefix, extra) {
+    const suffix = extra ? `${noun} ${extra}` : noun;
+    const moderneZin = [modernPrefix, modernDet, modernAdj, modernNoun, extra]
+      .filter(Boolean)
+      .join(" ");
+    return { prefix, suffix, moderneZin };
+  }
+
+  if (geval === "nominatief") return bouw("Dit is", "Dit is", "");
+  if (geval === "genitief") return bouw("de naam van", "de naam", "");
+  if (geval === "datief") {
+    if (isPersoon(woordObj)) return bouw("Ik geef", "Ik geef", "een geschenk");
+    return bouw("Hij spreekt van", "Hij spreekt van", "");
+  }
+  if (geval === "accusatief") return bouw("Ik zie", "Ik zie", "");
+}
+
 // --- Instellingen (opgeslagen in localStorage, gelden voor alle oefeningen) ---
 const INSTELLING_MODUS_KEY = "adhnn_modus";
 
