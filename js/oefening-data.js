@@ -311,13 +311,15 @@ function zinsdelenBijvSterk(woordObj, geval) {
   }
 }
 
-// De moderne zin gebruikt (zoals modern Nederlands vereist) wél een lidwoord;
-// het historische antwoord laat het juist expres weg — dat is de kern van
-// deze categorie.
+// Deze categorie draait juist om het weglaten van het lidwoord — dat geldt
+// dus ook voor de moderne zin. Bij een de-woord blijft het bijvoeglijk
+// naamwoord zonder lidwoord toch "-e" (goede koning), bij een het-woord
+// onverbogen (goed kind) — precies zoals modern Nederlands een bijvoeglijk
+// naamwoord zonder lidwoord al behandelt.
 function volledigeZinConfigBijvSterk(woordObj, geval) {
   const g = woordObj.geslacht;
-  const modernDet = ARTIKELEN[g].nominatief;
-  const modernAdj = BIJV_ZWAK_VORMEN_ENKEL[kiesBijvoeglijkNaamwoord(woordObj)].e;
+  const adjectief = kiesBijvoeglijkNaamwoord(woordObj);
+  const modernAdj = g === "o" ? adjectief : BIJV_ZWAK_VORMEN_ENKEL[adjectief].e;
   const modernNoun = woordObj.woord;
   const noun = naamwoordVormVoorZin(woordObj, geval);
 
@@ -326,7 +328,7 @@ function volledigeZinConfigBijvSterk(woordObj, geval) {
       { tekst: noun, kritiek: true },
       ...(extraVast ? extraVast.split(" ").map((t) => ({ tekst: t, kritiek: false })) : []),
     ];
-    const moderneZin = [modernPrefix, modernDet, modernAdj, modernNoun, extraVast]
+    const moderneZin = [modernPrefix, modernAdj, modernNoun, extraVast]
       .filter(Boolean)
       .join(" ");
     return { prefix, suffixDelen, moderneZin };
