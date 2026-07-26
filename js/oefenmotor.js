@@ -135,7 +135,8 @@ function volledigeZinTekst(config, kritiekVormen) {
     ...alsLijst(kritiekVormen)[0].split(" ").map((t) => ({ tekst: t })),
     ...segmentenVan(config.suffixDelen, config.suffix),
   ];
-  return segmenten.map((s) => s.tekst).join(" ");
+  const tekst = segmenten.map((s) => s.tekst).join(" ");
+  return tekst.charAt(0).toUpperCase() + tekst.slice(1);
 }
 
 function startOefening({
@@ -145,6 +146,7 @@ function startOefening({
   volledigeZinConfigFn = maakStandaardVolledigeZinConfig(moderneFraseFn),
   titelFn = standaardTitel,
   ondertitelFn = () => null,
+  woordenFilterFn = null,
 }) {
   let woorden = [];
   let modus = "deel";
@@ -465,7 +467,8 @@ function startOefening({
   laadWoorden()
     .then((data) => {
       modus = haalModusOp();
-      woorden = schudArray(data);
+      const gefilterd = woordenFilterFn ? data.filter(woordenFilterFn) : data;
+      woorden = schudArray(gefilterd);
       updateScore();
       renderWoord(idx);
       startTimer(haalTijdslimietOp());

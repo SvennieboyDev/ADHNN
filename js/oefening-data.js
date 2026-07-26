@@ -258,6 +258,105 @@ function volledigeZinConfigBijvZwak(woordObj, geval) {
   if (geval === "accusatief") return bouw("Ik zie", "Ik zie", "");
 }
 
+// --- Bijvoeglijke naamwoorden: sterke verbuiging (zonder lidwoord) ---
+// De sterke verbuiging komt in natuurlijk Nederlands alleen voor bij
+// stofnamen en abstracta, die (in tegenstelling tot telbare zelfstandige
+// naamwoorden zoals "visser" of "koning") ook zonder lidwoord een grammaticaal
+// correcte zin vormen ("Goud is kostbaar", niet "Visser is sterk"). Deze
+// categorie gebruikt daarom een kleinere, aparte woordenlijst.
+const STERK_GESCHIKTE_WOORDEN = [
+  "bloed", "goud", "water", "vuur", "brood", "licht",
+  "trouw", "deugd", "macht", "kracht", "hoop", "gunst",
+  "kunst", "liefde", "vreugde", "waarheid", "goedheid",
+  "vrijheid", "wijsheid", "schoonheid", "geld", "leven",
+  "geloof", "gevoel", "taal", "tijd",
+];
+
+// Zonder lidwoord, aanwijzend of bezittelijk voornaamwoord ervoor neemt het
+// bijvoeglijk naamwoord zelf de sterkere, "lidwoord-achtige" uitgang over.
+// Onzijdig nominatief/accusatief blijft daarbij helemaal onverbogen ("goed").
+const STERK_BIJV_UITGANGEN = {
+  nominatief: { m: "e", v: "e", o: "" },
+  genitief: { m: "s", v: "er", o: "s" },
+  datief: { m: "en", v: "er", o: "en" },
+  accusatief: { m: "en", v: "e", o: "" },
+};
+
+function bijvNaamwoordVormSterk(adjectief, geslacht, geval) {
+  const uitgang = STERK_BIJV_UITGANGEN[geval][geslacht];
+  if (uitgang === "") return adjectief;
+  if (uitgang === "s") return adjectief + "s"; // medeklinker-uitgang: geen klinker-aanpassing nodig
+  if (uitgang === "er") return bijvVormenTabel()[adjectief].e.slice(0, -1) + "er"; // zelfde klinkerregel als bij -e
+  return bijvVormenTabel()[adjectief][uitgang]; // "e" of "en": identiek aan de zwakke vorm
+}
+
+function vormenBijvSterk(woordObj) {
+  const adjectief = kiesBijvoeglijkNaamwoord(woordObj);
+  const g = woordObj.geslacht;
+  const resultaat = {};
+  CASES.forEach((geval) => {
+    resultaat[geval] = bijvNaamwoordVormSterk(adjectief, g, geval);
+  });
+  return resultaat;
+}
+
+function titelBijvSterk(woordObj) {
+  return `${kiesBijvoeglijkNaamwoord(woordObj)} + ${woordObj.woord} (${woordObj.geslacht})`;
+}
+
+function zinsdelenBijvSterk(woordObj, geval) {
+  const noun = naamwoordVormVoorZin(woordObj, geval);
+  const hint = `bijvoeglijk naamwoord: ${kiesBijvoeglijkNaamwoord(woordObj)}`;
+  if (geval === "nominatief") {
+    return { prefix: "", suffix: `${noun} is nodig`, hint };
+  }
+  if (geval === "genitief") {
+    return { prefix: "De naam", suffix: noun, hint };
+  }
+  if (geval === "datief") {
+    if (isPersoon(woordObj)) {
+      return { prefix: "Ik geef", suffix: `${noun} een geschenk`, hint };
+    }
+    return { prefix: "Hij spreekt van", suffix: noun, hint };
+  }
+  if (geval === "accusatief") {
+    return { prefix: "Ik zie", suffix: noun, hint };
+  }
+}
+
+// Deze categorie draait juist om het weglaten van het lidwoord — dat geldt
+// dus ook voor de moderne zin. Bij een de-woord blijft het bijvoeglijk
+// naamwoord zonder lidwoord toch "-e" (goede koning), bij een het-woord
+// onverbogen (goed kind) — precies zoals modern Nederlands een bijvoeglijk
+// naamwoord zonder lidwoord al behandelt.
+function volledigeZinConfigBijvSterk(woordObj, geval) {
+  const g = woordObj.geslacht;
+  const adjectief = kiesBijvoeglijkNaamwoord(woordObj);
+  const modernAdj = g === "o" ? adjectief : BIJV_ZWAK_VORMEN_ENKEL[adjectief].e;
+  const modernNoun = woordObj.woord;
+  const noun = naamwoordVormVoorZin(woordObj, geval);
+
+  function bouw(modernPrefix, prefix, extraVast) {
+    const suffixDelen = [
+      { tekst: noun, kritiek: true },
+      ...(extraVast ? extraVast.split(" ").map((t) => ({ tekst: t, kritiek: false })) : []),
+    ];
+    const moderneZinTekst = [modernPrefix, modernAdj, modernNoun, extraVast]
+      .filter(Boolean)
+      .join(" ");
+    const moderneZin = moderneZinTekst.charAt(0).toUpperCase() + moderneZinTekst.slice(1);
+    return { prefix, suffixDelen, moderneZin };
+  }
+
+  if (geval === "nominatief") return bouw("", "", "is nodig");
+  if (geval === "genitief") return bouw("De naam van", "De naam", "");
+  if (geval === "datief") {
+    if (isPersoon(woordObj)) return bouw("Ik geef", "Ik geef", "een geschenk");
+    return bouw("Hij spreekt van", "Hij spreekt van", "");
+  }
+  if (geval === "accusatief") return bouw("Ik zie", "Ik zie", "");
+}
+
 // --- Instellingen (opgeslagen in localStorage, gelden voor alle oefeningen) ---
 const INSTELLING_MODUS_KEY = "adhnn_modus";
 
