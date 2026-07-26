@@ -112,9 +112,8 @@ function moderneOnbepaaldeFrase(woordObj) {
 }
 
 // --- Bijvoeglijke naamwoorden: zwakke verbuiging ---
-// Na een bepaald lidwoord, aanwijzend voornaamwoord of bezittelijk
-// voornaamwoord krijgt het bijvoeglijk naamwoord altijd de zwakke
-// verbuiging (-e in de nominatief, verder meestal -en).
+// Na een bepaald lidwoord krijgt het bijvoeglijk naamwoord altijd de
+// zwakke verbuiging (-e in de nominatief, verder meestal -en).
 const ZWAK_BIJV_UITGANGEN = {
   nominatief: { m: "e", v: "e", o: "e" },
   genitief: { m: "en", v: "e", o: "en" },
@@ -122,52 +121,38 @@ const ZWAK_BIJV_UITGANGEN = {
   accusatief: { m: "en", v: "e", o: "e" },
 };
 
-// We oefenen steeds met hetzelfde bijvoeglijk naamwoord ("goed"), zodat de
-// oefening zich puur richt op de verbuiging en niet op steeds een ander
-// woord moeten herkennen.
-const BIJV_STAM = "goed";
+// Een handvol bijvoeglijke naamwoorden, met hun al correct afgeleide
+// -e en -en vorm (rekening houdend met de gewone Nederlandse spellingregels:
+// klinkerverdubbeling die wegvalt in een open lettergreep ("groot" -> "grote"),
+// medeklinkerverdubbeling na een korte klinker ("zwak" -> "zwakke") en
+// stemhebbend worden van -s/-f ("lief" -> "lieve")).
+const BIJV_ZWAK_VORMEN = {
+  goed: { e: "goede", en: "goeden" },
+  heel: { e: "hele", en: "helen" },
+  groot: { e: "grote", en: "groten" },
+  hoog: { e: "hoge", en: "hogen" },
+  klein: { e: "kleine", en: "kleinen" },
+  sterk: { e: "sterke", en: "sterken" },
+  rijk: { e: "rijke", en: "rijken" },
+  oud: { e: "oude", en: "ouden" },
+  zwak: { e: "zwakke", en: "zwakken" },
+  lief: { e: "lieve", en: "lieven" },
+};
+const BIJV_ZWAK_ADJECTIEVEN = Object.keys(BIJV_ZWAK_VORMEN);
 
-function bijvNaamwoordVorm(geslacht, geval) {
-  return BIJV_STAM + ZWAK_BIJV_UITGANGEN[geval][geslacht];
+function bijvNaamwoordVorm(adjectief, geslacht, geval) {
+  const uitgang = ZWAK_BIJV_UITGANGEN[geval][geslacht];
+  return BIJV_ZWAK_VORMEN[adjectief][uitgang];
 }
 
-// De drie soorten bepalers die zwakke verbuiging veroorzaken. "modern" is de
-// (ongeslachtelijke) hedendaagse vorm; "tabel" is de historische verbuiging.
-const DETERMINER_PROFIELEN = {
-  bepaald: {
-    label: "het bepaalde lidwoord (de/het)",
-    modern: { m: "de", v: "de", o: "het" },
-    tabel: ARTIKELEN,
-  },
-  aanwijzend: {
-    label: "een aanwijzend voornaamwoord (die/dat)",
-    modern: { m: "die", v: "die", o: "dat" },
-    tabel: {
-      m: { nominatief: "die", genitief: "diens", datief: "dien", accusatief: "dien" },
-      v: { nominatief: "die", genitief: "dier", datief: "dier", accusatief: "die" },
-      o: { nominatief: "dat", genitief: "diens", datief: "dien", accusatief: "dat" },
-    },
-  },
-  bezittelijk: {
-    label: "een bezittelijk voornaamwoord (mijn)",
-    modern: { m: "mijn", v: "mijn", o: "mijn" },
-    tabel: {
-      m: { nominatief: "mijn", genitief: "mijns", datief: "mijnen", accusatief: "mijnen" },
-      v: { nominatief: "mijne", genitief: "mijner", datief: "mijner", accusatief: "mijne" },
-      o: { nominatief: "mijn", genitief: "mijns", datief: "mijnen", accusatief: "mijn" },
-    },
-  },
-};
-
-// Elk woord krijgt willekeurig één van de drie bepalers toegewezen, maar wel
-// steeds dezelfde voor alle 4 vragen van dat woord (anders klopt de context
-// niet meer). Het gekozen profiel wordt op het woordobject zelf onthouden.
-function kiesProfiel(woordObj) {
-  if (!woordObj._profielNaam) {
-    const namen = Object.keys(DETERMINER_PROFIELEN);
-    woordObj._profielNaam = namen[Math.floor(Math.random() * namen.length)];
+// Elk woord krijgt willekeurig één bijvoeglijk naamwoord toegewezen, maar wel
+// steeds hetzelfde voor alle 4 vragen van dat woord. De keuze wordt op het
+// woordobject zelf onthouden.
+function kiesBijvoeglijkNaamwoord(woordObj) {
+  if (!woordObj._bijvNaamwoord) {
+    woordObj._bijvNaamwoord = BIJV_ZWAK_ADJECTIEVEN[Math.floor(Math.random() * BIJV_ZWAK_ADJECTIEVEN.length)];
   }
-  return DETERMINER_PROFIELEN[woordObj._profielNaam];
+  return woordObj._bijvNaamwoord;
 }
 
 // Het zelfstandig naamwoord zelf verbuigt exact zoals bij het bepaalde
@@ -179,32 +164,28 @@ function naamwoordVormVoorZin(woordObj, geval) {
 }
 
 function vormenBijvZwak(woordObj) {
-  const profiel = kiesProfiel(woordObj);
+  const adjectief = kiesBijvoeglijkNaamwoord(woordObj);
   const g = woordObj.geslacht;
-  const det = profiel.tabel[g];
+  const det = ARTIKELEN[g];
   const resultaat = {};
   CASES.forEach((geval) => {
-    resultaat[geval] = `${det[geval]} ${bijvNaamwoordVorm(g, geval)}`;
+    resultaat[geval] = `${det[geval]} ${bijvNaamwoordVorm(adjectief, g, geval)}`;
   });
-  // Bij het bepaalde lidwoord werd voor de datief onzijdig ook al de
-  // onverbogen vorm "het goede" gebruikt naast "den goeden".
-  if (woordObj._profielNaam === "bepaald" && g === "o") {
-    resultaat.datief = [resultaat.datief, `het ${bijvNaamwoordVorm(g, "nominatief")}`];
+  // Bij de datief onzijdig werd ook al de onverbogen vorm ("het goede")
+  // gebruikt naast de volledig verbogen vorm ("den goeden").
+  if (g === "o") {
+    resultaat.datief = [resultaat.datief, `het ${bijvNaamwoordVorm(adjectief, g, "nominatief")}`];
   }
   return resultaat;
 }
 
 function titelBijvZwak(woordObj) {
-  return `${BIJV_STAM} + ${woordObj.woord} (${woordObj.geslacht})`;
-}
-
-function ondertitelBijvZwak(woordObj) {
-  return `Gebruikt met ${kiesProfiel(woordObj).label}`;
+  return `${kiesBijvoeglijkNaamwoord(woordObj)} + ${woordObj.woord} (${woordObj.geslacht})`;
 }
 
 function zinsdelenBijvZwak(woordObj, geval) {
   const noun = naamwoordVormVoorZin(woordObj, geval);
-  const hint = `bijvoeglijk naamwoord: ${BIJV_STAM}`;
+  const hint = `bijvoeglijk naamwoord: ${kiesBijvoeglijkNaamwoord(woordObj)}`;
   if (geval === "nominatief") {
     return { prefix: "", suffix: noun, hint };
   }
@@ -223,10 +204,9 @@ function zinsdelenBijvZwak(woordObj, geval) {
 }
 
 function volledigeZinConfigBijvZwak(woordObj, geval) {
-  const profiel = kiesProfiel(woordObj);
   const g = woordObj.geslacht;
-  const modernDet = profiel.modern[g];
-  const modernAdj = "goede"; // modern Nederlands: altijd -e na de/het/die/dat/mijn e.d.
+  const modernDet = ARTIKELEN[g].nominatief; // modern lidwoord verbuigt niet
+  const modernAdj = BIJV_ZWAK_VORMEN[kiesBijvoeglijkNaamwoord(woordObj)].e; // modern: altijd -e
   const modernNoun = woordObj.woord;
   const noun = naamwoordVormVoorZin(woordObj, geval);
 

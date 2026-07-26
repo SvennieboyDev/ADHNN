@@ -3,5 +3,4 @@ startOefening({
   zinsdelenFn: zinsdelenBijvZwak,
   volledigeZinConfigFn: volledigeZinConfigBijvZwak,
   titelFn: titelBijvZwak,
-  ondertitelFn: ondertitelBijvZwak,
 });
