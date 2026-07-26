@@ -45,6 +45,7 @@ function updateScore() {
 function renderWoord(i) {
   attempted = {};
   correctDone = {};
+  const inputsByCase = {};
   if (enterHandler) {
     document.removeEventListener("keydown", enterHandler);
     enterHandler = null;
@@ -105,6 +106,7 @@ function renderWoord(i) {
     input.autocapitalize = "off";
     input.spellcheck = false;
     zin.appendChild(input);
+    inputsByCase[geval] = input;
     if (suffix) {
       const suffixSpan = document.createElement("span");
       suffixSpan.textContent = suffix;
@@ -138,6 +140,12 @@ function renderWoord(i) {
         feedback.textContent = "";
         updateScore();
         checkVolledig();
+        const volgendeGeval = CASES.find((c) => !correctDone[c]);
+        if (volgendeGeval) {
+          inputsByCase[volgendeGeval].focus();
+        } else if (!volgendeBtn.hidden) {
+          volgendeBtn.focus();
+        }
       } else {
         input.classList.remove("correct");
         input.classList.add("incorrect");
@@ -189,7 +197,7 @@ function renderWoord(i) {
 
 laadWoorden()
   .then((data) => {
-    woorden = data;
+    woorden = schudArray(data);
     updateScore();
     renderWoord(idx);
   })
