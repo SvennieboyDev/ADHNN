@@ -42,15 +42,9 @@ function stamVorm(woordObj) {
 }
 
 function obliekeVorm(woordObj) {
-  // Genitief/datief/accusatief-vorm van het zelfstandig naamwoord zelf
-  // (los van het lidwoord).
-  if (isZwak(woordObj)) {
-    return ZWAKKE_VORMEN[woordObj.woord];
-  }
-  if (woordObj.geslacht === "v") {
-    return woordObj.woord;
-  }
-  // sterke mannelijke/onzijdige naamwoorden
+  // Datief/accusatief-vorm van het zelfstandig naamwoord zelf (los van het
+  // lidwoord). "zwakke_genitief" beïnvloedt uitsluitend de genitief-uitgang;
+  // datief en accusatief enkelvoud blijven altijd de kale stam.
   return woordObj.woord;
 }
 
