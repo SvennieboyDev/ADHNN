@@ -259,6 +259,19 @@ function volledigeZinConfigBijvZwak(woordObj, geval) {
 }
 
 // --- Bijvoeglijke naamwoorden: sterke verbuiging (zonder lidwoord) ---
+// De sterke verbuiging komt in natuurlijk Nederlands alleen voor bij
+// stofnamen en abstracta, die (in tegenstelling tot telbare zelfstandige
+// naamwoorden zoals "visser" of "koning") ook zonder lidwoord een grammaticaal
+// correcte zin vormen ("Goud is kostbaar", niet "Visser is sterk"). Deze
+// categorie gebruikt daarom een kleinere, aparte woordenlijst.
+const STERK_GESCHIKTE_WOORDEN = [
+  "bloed", "goud", "water", "vuur", "brood", "licht",
+  "trouw", "deugd", "macht", "kracht", "hoop", "gunst",
+  "kunst", "liefde", "vreugde", "waarheid", "goedheid",
+  "vrijheid", "wijsheid", "schoonheid", "geld", "leven",
+  "geloof", "gevoel", "taal", "tijd",
+];
+
 // Zonder lidwoord, aanwijzend of bezittelijk voornaamwoord ervoor neemt het
 // bijvoeglijk naamwoord zelf de sterkere, "lidwoord-achtige" uitgang over.
 // Onzijdig nominatief/accusatief blijft daarbij helemaal onverbogen ("goed").
@@ -295,7 +308,7 @@ function zinsdelenBijvSterk(woordObj, geval) {
   const noun = naamwoordVormVoorZin(woordObj, geval);
   const hint = `bijvoeglijk naamwoord (zonder lidwoord): ${kiesBijvoeglijkNaamwoord(woordObj)}`;
   if (geval === "nominatief") {
-    return { prefix: "", suffix: noun, hint };
+    return { prefix: "", suffix: `${noun} is nodig`, hint };
   }
   if (geval === "genitief") {
     return { prefix: "De naam", suffix: noun, hint };
@@ -328,13 +341,14 @@ function volledigeZinConfigBijvSterk(woordObj, geval) {
       { tekst: noun, kritiek: true },
       ...(extraVast ? extraVast.split(" ").map((t) => ({ tekst: t, kritiek: false })) : []),
     ];
-    const moderneZin = [modernPrefix, modernAdj, modernNoun, extraVast]
+    const moderneZinTekst = [modernPrefix, modernAdj, modernNoun, extraVast]
       .filter(Boolean)
       .join(" ");
+    const moderneZin = moderneZinTekst.charAt(0).toUpperCase() + moderneZinTekst.slice(1);
     return { prefix, suffixDelen, moderneZin };
   }
 
-  if (geval === "nominatief") return bouw("Hij geldt als", "Hij geldt als", "");
+  if (geval === "nominatief") return bouw("", "", "is nodig");
   if (geval === "genitief") return bouw("De naam van", "De naam", "");
   if (geval === "datief") {
     if (isPersoon(woordObj)) return bouw("Ik geef", "Ik geef", "een geschenk");
