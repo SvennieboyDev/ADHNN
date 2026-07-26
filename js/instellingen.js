@@ -4,6 +4,14 @@ const volgende = params.get("volgende") || "index.html";
 const huidigeModus = haalModusOp();
 document.querySelector(`input[name="modus"][value="${huidigeModus}"]`).checked = true;
 
+const klinkerFieldset = document.getElementById("klinker-fieldset");
+const heeftBijvoeglijkeNaamwoorden = volgende.startsWith("bijvoeglijk-naamwoord");
+klinkerFieldset.hidden = !heeftBijvoeglijkeNaamwoorden;
+if (heeftBijvoeglijkeNaamwoorden) {
+  const huidigeKlinker = haalKlinkerspellingOp();
+  document.querySelector(`input[name="klinker"][value="${huidigeKlinker}"]`).checked = true;
+}
+
 const tijdSlider = document.getElementById("tijd-slider");
 const tijdWaardeGetal = document.getElementById("tijd-waarde-getal");
 const tijdWaarschuwing = document.getElementById("tijd-waarschuwing");
@@ -39,5 +47,9 @@ document.getElementById("instellingen-form").addEventListener("submit", (e) => {
   const gekozen = document.querySelector('input[name="modus"]:checked').value;
   zetModus(gekozen);
   zetTijdslimiet(minuten);
+  if (heeftBijvoeglijkeNaamwoorden) {
+    const klinker = document.querySelector('input[name="klinker"]:checked').value;
+    zetKlinkerspelling(klinker);
+  }
   window.location.href = volgende;
 });

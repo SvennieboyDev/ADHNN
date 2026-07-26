@@ -73,14 +73,24 @@ function alsLijst(waarde) {
   return Array.isArray(waarde) ? waarde : [waarde];
 }
 
+// Zet een vast prefix/suffix-stuk om in los beoordeelde woord-segmenten.
+// Categorieën kunnen zelf al een lijst van {tekst, kritiek}-segmenten
+// aanleveren (bv. omdat het zelfstandig naamwoord daar ook naamvals-
+// afhankelijk verandert en dus exact moet kloppen, geen typfout-coulance);
+// anders wordt de hele tekststring als niet-kritiek behandeld.
+function segmentenVan(delen, tekst) {
+  if (delen) return delen;
+  return tekst ? tekst.split(" ").map((t) => ({ tekst: t, kritiek: false })) : [];
+}
+
 // Beoordeelt één kandidaat-antwoord voor een volledig overgetypte zin: het
 // naamval-gedeelte (kritiek) moet exact kloppen, kleine typefouten in de
 // rest van de zin mogen.
 function beoordeelZinKandidaat(waarde, config, kritiekVorm) {
   const segmenten = [
-    ...(config.prefix ? config.prefix.split(" ") : []).map((t) => ({ tekst: t, kritiek: false })),
+    ...segmentenVan(config.prefixDelen, config.prefix),
     ...kritiekVorm.split(" ").map((t) => ({ tekst: t, kritiek: true })),
-    ...(config.suffix ? config.suffix.split(" ") : []).map((t) => ({ tekst: t, kritiek: false })),
+    ...segmentenVan(config.suffixDelen, config.suffix),
   ];
   const actueleWoorden = normaliseer(waarde).split(" ").filter(Boolean);
   if (actueleWoorden.length !== segmenten.length) {
