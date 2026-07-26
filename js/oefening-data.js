@@ -306,7 +306,7 @@ function titelBijvSterk(woordObj) {
 
 function zinsdelenBijvSterk(woordObj, geval) {
   const noun = naamwoordVormVoorZin(woordObj, geval);
-  const hint = `bijvoeglijk naamwoord (zonder lidwoord): ${kiesBijvoeglijkNaamwoord(woordObj)}`;
+  const hint = `bijvoeglijk naamwoord: ${kiesBijvoeglijkNaamwoord(woordObj)}`;
   if (geval === "nominatief") {
     return { prefix: "", suffix: `${noun} is nodig`, hint };
   }
