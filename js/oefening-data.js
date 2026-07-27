@@ -205,7 +205,7 @@ function vormenBijvZwak(woordObj) {
 }
 
 function titelBijvZwak(woordObj) {
-  return `${kiesBijvoeglijkNaamwoord(woordObj)} + ${woordObj.woord} (${woordObj.geslacht})`;
+  return `${kiesBijvoeglijkNaamwoord(woordObj)} + ${woordObj.woord}${geslachtSuffix(woordObj.geslacht)}`;
 }
 
 function zinsdelenBijvZwak(woordObj, geval) {
@@ -301,7 +301,7 @@ function vormenBijvSterk(woordObj) {
 }
 
 function titelBijvSterk(woordObj) {
-  return `${kiesBijvoeglijkNaamwoord(woordObj)} + ${woordObj.woord} (${woordObj.geslacht})`;
+  return `${kiesBijvoeglijkNaamwoord(woordObj)} + ${woordObj.woord}${geslachtSuffix(woordObj.geslacht)}`;
 }
 
 function zinsdelenBijvSterk(woordObj, geval) {
@@ -366,6 +366,23 @@ function haalModusOp() {
 
 function zetModus(modus) {
   localStorage.setItem(INSTELLING_MODUS_KEY, modus === "zin" ? "zin" : "deel");
+}
+
+const INSTELLING_GESLACHT_KEY = "adhnn_toon_geslacht";
+
+function haalToonGeslachtOp() {
+  return localStorage.getItem(INSTELLING_GESLACHT_KEY) !== "uit";
+}
+
+function zetToonGeslacht(tonen) {
+  localStorage.setItem(INSTELLING_GESLACHT_KEY, tonen ? "aan" : "uit");
+}
+
+// Gebruikt door elke titelfunctie die het geslacht na het zelfstandig
+// naamwoord toont, zodat de "geslacht tonen"-instelling overal hetzelfde
+// werkt.
+function geslachtSuffix(geslacht) {
+  return haalToonGeslachtOp() ? ` (${geslacht})` : "";
 }
 
 const INSTELLING_TIJD_KEY = "adhnn_tijdslimiet_minuten";

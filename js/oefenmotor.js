@@ -62,7 +62,7 @@ function maakStandaardVolledigeZinConfig(moderneFraseFn) {
 }
 
 function standaardTitel(woordObj) {
-  return `${woordObj.woord} (${woordObj.geslacht})`;
+  return `${woordObj.woord}${geslachtSuffix(woordObj.geslacht)}`;
 }
 
 function normaliseer(tekst) {
