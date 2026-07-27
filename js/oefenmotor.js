@@ -147,6 +147,7 @@ function startOefening({
   titelFn = standaardTitel,
   ondertitelFn = () => null,
   woordenFilterFn = null,
+  woordenBronFn = laadWoorden,
 }) {
   let woorden = [];
   let modus = "deel";
@@ -464,7 +465,7 @@ function startOefening({
     }
   }
 
-  laadWoorden()
+  woordenBronFn()
     .then((data) => {
       modus = haalModusOp();
       const gefilterd = woordenFilterFn ? data.filter(woordenFilterFn) : data;

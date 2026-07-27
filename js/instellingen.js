@@ -4,8 +4,16 @@ const volgende = params.get("volgende") || "index.html";
 const huidigeModus = haalModusOp();
 document.querySelector(`input[name="modus"][value="${huidigeModus}"]`).checked = true;
 
-const huidigeGeslacht = haalToonGeslachtOp() ? "aan" : "uit";
-document.querySelector(`input[name="geslacht"][value="${huidigeGeslacht}"]`).checked = true;
+const geslachtFieldset = document.getElementById("geslacht-fieldset");
+const heeftGeslacht =
+  volgende === "bepaald-lidwoord.html" ||
+  volgende === "onbepaald-lidwoord.html" ||
+  volgende.startsWith("bijvoeglijk-naamwoord");
+geslachtFieldset.hidden = !heeftGeslacht;
+if (heeftGeslacht) {
+  const huidigeGeslacht = haalToonGeslachtOp() ? "aan" : "uit";
+  document.querySelector(`input[name="geslacht"][value="${huidigeGeslacht}"]`).checked = true;
+}
 
 const klinkerFieldset = document.getElementById("klinker-fieldset");
 const heeftBijvoeglijkeNaamwoorden = volgende.startsWith("bijvoeglijk-naamwoord");
@@ -13,6 +21,15 @@ klinkerFieldset.hidden = !heeftBijvoeglijkeNaamwoorden;
 if (heeftBijvoeglijkeNaamwoorden) {
   const huidigeKlinker = haalKlinkerspellingOp();
   document.querySelector(`input[name="klinker"][value="${huidigeKlinker}"]`).checked = true;
+}
+
+const archaischFieldset = document.getElementById("archaisch-fieldset");
+const heeftArchaischeVormen = volgende === "persoonlijke-voornaamwoorden.html";
+archaischFieldset.hidden = !heeftArchaischeVormen;
+if (heeftArchaischeVormen) {
+  document.querySelector('input[name="archaisch-du"]').checked = haalArchaischDuOp();
+  document.querySelector('input[name="archaisch-gijlieden"]').checked = haalArchaischGijliedenOp();
+  document.querySelector('input[name="archaisch-wijlieden"]').checked = haalArchaischWijliedenOp();
 }
 
 const tijdSlider = document.getElementById("tijd-slider");
@@ -50,11 +67,18 @@ document.getElementById("instellingen-form").addEventListener("submit", (e) => {
   const gekozen = document.querySelector('input[name="modus"]:checked').value;
   zetModus(gekozen);
   zetTijdslimiet(minuten);
-  const geslachtTonen = document.querySelector('input[name="geslacht"]:checked').value === "aan";
-  zetToonGeslacht(geslachtTonen);
+  if (heeftGeslacht) {
+    const geslachtTonen = document.querySelector('input[name="geslacht"]:checked').value === "aan";
+    zetToonGeslacht(geslachtTonen);
+  }
   if (heeftBijvoeglijkeNaamwoorden) {
     const klinker = document.querySelector('input[name="klinker"]:checked').value;
     zetKlinkerspelling(klinker);
+  }
+  if (heeftArchaischeVormen) {
+    zetArchaischDu(document.querySelector('input[name="archaisch-du"]').checked);
+    zetArchaischGijlieden(document.querySelector('input[name="archaisch-gijlieden"]').checked);
+    zetArchaischWijlieden(document.querySelector('input[name="archaisch-wijlieden"]').checked);
   }
   window.location.href = volgende;
 });
