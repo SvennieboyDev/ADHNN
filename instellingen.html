@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Instellingen — App der historische Nederlandse naamvallen</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css?v=2">
 </head>
 <body>
   <main class="instellingen-screen">
@@ -35,6 +35,28 @@
             Je ziet een modern Nederlandse zin en typt die volledig over met de juiste
             historische naamvalsvormen. Kleine typefoutjes buiten de naamvalsvorm worden
             niet afgekeurd.
+          </span>
+        </label>
+      </fieldset>
+
+      <fieldset>
+        <legend>Geslacht bij het zelfstandig naamwoord</legend>
+
+        <label class="instelling-optie">
+          <input type="radio" name="geslacht" value="aan">
+          <span>
+            <strong>Toon geslacht</strong> (m/v/o)
+            <br>
+            Handig om patronen te leren herkennen.
+          </span>
+        </label>
+
+        <label class="instelling-optie">
+          <input type="radio" name="geslacht" value="uit">
+          <span>
+            <strong>Verberg geslacht</strong>
+            <br>
+            Voor als je je geheugen wilt trainen.
           </span>
         </label>
       </fieldset>
@@ -75,7 +97,7 @@
     </form>
   </main>
 
-  <script src="js/oefening-data.js"></script>
-  <script src="js/instellingen.js"></script>
+  <script src="js/oefening-data.js?v=2"></script>
+  <script src="js/instellingen.js?v=2"></script>
 </body>
 </html>
