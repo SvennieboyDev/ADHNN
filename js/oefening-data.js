@@ -357,6 +357,87 @@ function volledigeZinConfigBijvSterk(woordObj, geval) {
   if (geval === "accusatief") return bouw("Ik zie", "Ik zie", "");
 }
 
+// --- Bijvoeglijke naamwoorden: gemengde verbuiging (na "een") ---
+// Een mix: de nominatief (en bij m/o de accusatief) blijft onverbogen, net
+// als bij de sterke verbuiging (het onbepaald lidwoord zelf draagt daar geen
+// naamvalsmarkering) — maar genitief/datief krijgen de zwakke -en-uitgang,
+// omdat "eens"/"eenen" daar zelf al wél de naamval laten zien.
+const GEMENGD_BIJV_UITGANGEN = {
+  nominatief: { m: "", v: "e", o: "" },
+  genitief: { m: "en", v: "e", o: "en" },
+  datief: { m: "en", v: "e", o: "en" },
+  accusatief: { m: "en", v: "e", o: "" },
+};
+
+function bijvNaamwoordVormGemengd(adjectief, geslacht, geval) {
+  const uitgang = GEMENGD_BIJV_UITGANGEN[geval][geslacht];
+  if (uitgang === "") return adjectief;
+  return bijvVormenTabel()[adjectief][uitgang]; // "e" of "en": identiek aan de zwakke vorm
+}
+
+function vormenBijvGemengd(woordObj) {
+  const adjectief = kiesBijvoeglijkNaamwoord(woordObj);
+  const g = woordObj.geslacht;
+  const det = ONBEPAALD_ARTIKELEN[g];
+  const resultaat = {};
+  CASES.forEach((geval) => {
+    resultaat[geval] = `${det[geval]} ${bijvNaamwoordVormGemengd(adjectief, g, geval)}`;
+  });
+  return resultaat;
+}
+
+function titelBijvGemengd(woordObj) {
+  return `${kiesBijvoeglijkNaamwoord(woordObj)} + ${woordObj.woord}${geslachtSuffix(woordObj.geslacht)}`;
+}
+
+function zinsdelenBijvGemengd(woordObj, geval) {
+  const noun = naamwoordVormVoorZin(woordObj, geval);
+  const hint = `lidwoord + bijvoeglijk naamwoord: ${kiesBijvoeglijkNaamwoord(woordObj)}`;
+  if (geval === "nominatief") {
+    return { prefix: "", suffix: noun, hint };
+  }
+  if (geval === "genitief") {
+    return { prefix: "De naam", suffix: noun, hint };
+  }
+  if (geval === "datief") {
+    if (isPersoon(woordObj)) {
+      return { prefix: "Ik geef", suffix: `${noun} een geschenk`, hint };
+    }
+    return { prefix: "Hij spreekt van", suffix: noun, hint };
+  }
+  if (geval === "accusatief") {
+    return { prefix: "Ik zie", suffix: noun, hint };
+  }
+}
+
+function volledigeZinConfigBijvGemengd(woordObj, geval) {
+  const g = woordObj.geslacht;
+  const modernDet = "een"; // modern onbepaald lidwoord verbuigt niet
+  const modernAdj = BIJV_ZWAK_VORMEN_ENKEL[kiesBijvoeglijkNaamwoord(woordObj)].e;
+  const modernNoun = woordObj.woord;
+  const noun = naamwoordVormVoorZin(woordObj, geval);
+
+  function bouw(modernPrefix, prefix, extraVast) {
+    const suffixDelen = [
+      { tekst: noun, kritiek: true },
+      ...(extraVast ? extraVast.split(" ").map((t) => ({ tekst: t, kritiek: false })) : []),
+    ];
+    const moderneZinTekst = [modernPrefix, modernDet, modernAdj, modernNoun, extraVast]
+      .filter(Boolean)
+      .join(" ");
+    const moderneZin = moderneZinTekst.charAt(0).toUpperCase() + moderneZinTekst.slice(1);
+    return { prefix, suffixDelen, moderneZin };
+  }
+
+  if (geval === "nominatief") return bouw("Dit is", "Dit is", "");
+  if (geval === "genitief") return bouw("De naam van", "De naam", "");
+  if (geval === "datief") {
+    if (isPersoon(woordObj)) return bouw("Ik geef", "Ik geef", "een geschenk");
+    return bouw("Hij spreekt van", "Hij spreekt van", "");
+  }
+  if (geval === "accusatief") return bouw("Ik zie", "Ik zie", "");
+}
+
 // --- Instellingen (opgeslagen in localStorage, gelden voor alle oefeningen) ---
 const INSTELLING_MODUS_KEY = "adhnn_modus";
 
