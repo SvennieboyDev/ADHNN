@@ -358,12 +358,12 @@ function volledigeZinConfigBijvSterk(woordObj, geval) {
 }
 
 // --- Bijvoeglijke naamwoorden: gemengde verbuiging (na "een") ---
-// Een mix: de nominatief (en bij m/o de accusatief) blijft onverbogen, net
-// als bij de sterke verbuiging (het onbepaald lidwoord zelf draagt daar geen
-// naamvalsmarkering) — maar genitief/datief krijgen de zwakke -en-uitgang,
-// omdat "eens"/"eenen" daar zelf al wél de naamval laten zien.
+// Een mix: bij onzijdig blijven nominatief/accusatief onverbogen, net als bij
+// de sterke verbuiging (het onbepaald lidwoord draagt daar geen
+// naamvalsmarkering) — maar genitief/datief (en bij mannelijk ook de
+// nominatief) krijgen de zwakke -e/-en-uitgang.
 const GEMENGD_BIJV_UITGANGEN = {
-  nominatief: { m: "", v: "e", o: "" },
+  nominatief: { m: "e", v: "e", o: "" },
   genitief: { m: "en", v: "e", o: "en" },
   datief: { m: "en", v: "e", o: "en" },
   accusatief: { m: "en", v: "e", o: "" },
