@@ -441,6 +441,197 @@ function volledigeZinConfigBijvGemengd(woordObj, geval) {
   if (geval === "accusatief") return bouw("Ik zie", "Ik zie", "");
 }
 
+// --- Persoonlijke voornaamwoorden ---
+// Geen woordenlijst dit keer, maar een vaste set personen. "zij" (enkelvoud)
+// en "zij" (meervoud) zien er in modern Nederlands identiek uit maar hebben
+// een andere historische verbuiging, dus die staan als twee aparte items met
+// een verduidelijkend label.
+const PERSOONLIJKE_VOORNAAMWOORDEN = [
+  {
+    id: "ik",
+    label: "ik",
+    werkwoordVorm: "loop",
+    modernSubject: "ik",
+    modernObject: "mij",
+    vorm: () => ({ nominatief: "ik", genitief: "mijner", datief: "mij", accusatief: "mij" }),
+  },
+  {
+    id: "jij",
+    label: "jij",
+    werkwoordVorm: "loopt",
+    // "du" vervoegt met -st (du loopst), net als in het Duits/Engels ("thou
+    // walkest") — dat is een andere uitgang dan de -t van "gij" (gij loopt).
+    historischWerkwoordVorm: () => (haalArchaischDuOp() ? "loopst" : "loopt"),
+    modernSubject: "jij",
+    modernObject: "jou",
+    vorm: () =>
+      haalArchaischDuOp()
+        ? { nominatief: "du", genitief: ["dijner", "diner"], datief: ["di", "dij"], accusatief: ["di", "dij"] }
+        : { nominatief: "gij", genitief: "uwer", datief: "u", accusatief: "u" },
+  },
+  {
+    id: "u",
+    label: "u",
+    werkwoordVorm: "loopt",
+    historischWerkwoordVorm: () => (haalArchaischDuOp() ? "loopst" : "loopt"),
+    modernSubject: "u",
+    modernObject: "u",
+    vorm: () =>
+      haalArchaischDuOp()
+        ? { nominatief: "du", genitief: ["dijner", "diner"], datief: ["di", "dij"], accusatief: ["di", "dij"] }
+        : { nominatief: "gij", genitief: "uwer", datief: "u", accusatief: "u" },
+  },
+  {
+    id: "hij",
+    label: "hij",
+    werkwoordVorm: "loopt",
+    modernSubject: "hij",
+    modernObject: "hem",
+    vorm: () => ({ nominatief: "hij", genitief: "zijner", datief: "hem", accusatief: "hem" }),
+  },
+  {
+    id: "zij-ev",
+    label: "zij (enkelvoud)",
+    werkwoordVorm: "loopt",
+    modernSubject: "zij",
+    modernObject: "haar",
+    vorm: () => ({ nominatief: "zij", genitief: "harer", datief: "haar", accusatief: "haar" }),
+  },
+  {
+    id: "het",
+    label: "het",
+    werkwoordVorm: "loopt",
+    modernSubject: "het",
+    modernObject: "het",
+    vorm: () => ({ nominatief: "het", genitief: "zijner", datief: "het", accusatief: "het" }),
+  },
+  {
+    id: "wij",
+    label: "wij",
+    werkwoordVorm: "lopen",
+    modernSubject: "wij",
+    modernObject: "ons",
+    vorm: () =>
+      haalArchaischWijliedenOp()
+        ? {
+            nominatief: "wijlieden",
+            genitief: ["onzer", "onzelieder"],
+            datief: ["ons", "onslieden"],
+            accusatief: ["ons", "onslieden"],
+          }
+        : { nominatief: "wij", genitief: "onzer", datief: "ons", accusatief: "ons" },
+  },
+  {
+    id: "jullie",
+    label: "jullie",
+    werkwoordVorm: "lopen",
+    // "gij" vervoegt historisch enkelvoudig ("gij loopt"), ook waar het "jullie"
+    // vervangt — alleen het archaïsche "gijlieden" is echt meervoud ("gijlieden lopen").
+    historischWerkwoordVorm: () => (haalArchaischGijliedenOp() ? "lopen" : "loopt"),
+    modernSubject: "jullie",
+    modernObject: "jullie",
+    vorm: () =>
+      haalArchaischGijliedenOp()
+        ? {
+            nominatief: "gijlieden",
+            genitief: ["uwer", "ulieder"],
+            datief: ["u", "ulieden"],
+            accusatief: ["u", "ulieden"],
+          }
+        : { nominatief: "gij", genitief: "uwer", datief: "u", accusatief: "u" },
+  },
+  {
+    id: "zij-mv",
+    label: "zij (meervoud)",
+    werkwoordVorm: "lopen",
+    modernSubject: "zij",
+    // In modern Nederlands is er een naamvalsonderscheid overgebleven: "hun"
+    // als meewerkend voorwerp (datief), "hen" als lijdend voorwerp
+    // (accusatief) of na een voorzetsel (genitief-zin "denkt aan hen").
+    modernObject: { genitief: "hen", datief: "hun", accusatief: "hen" },
+    vorm: () => ({ nominatief: "zij", genitief: "hunner", datief: "hun", accusatief: "hen" }),
+  },
+];
+
+function laadPersoonlijkeVoornaamwoorden() {
+  return Promise.resolve(PERSOONLIJKE_VOORNAAMWOORDEN);
+}
+
+function vormenPersoonlijk(item) {
+  return item.vorm();
+}
+
+function titelPersoonlijk(item) {
+  return item.label;
+}
+
+function historischWerkwoordVormVoor(item) {
+  return item.historischWerkwoordVorm ? item.historischWerkwoordVorm() : item.werkwoordVorm;
+}
+
+function zinsdelenPersoonlijk(item, geval) {
+  if (geval === "nominatief") {
+    return { prefix: "", suffix: `${historischWerkwoordVormVoor(item)} hard` };
+  }
+  if (geval === "genitief") {
+    return { prefix: "Men gedenke", suffix: "" };
+  }
+  if (geval === "datief") {
+    return { prefix: "Zij geeft", suffix: "een geschenk" };
+  }
+  if (geval === "accusatief") {
+    return { prefix: "Zij ziet", suffix: "" };
+  }
+}
+
+// De genitief-zin gebruikt bewust een ander werkwoord in de moderne vorm
+// ("denkt aan") dan in de historische vorm ("gedenke"): een genitief-
+// voornaamwoord zonder voorzetsel bestaat in modern Nederlands namelijk niet
+// meer, dus de "vertaling" zit hier ook al deels in het werkwoord zelf.
+function modernObjectVoor(item, geval) {
+  return typeof item.modernObject === "object" ? item.modernObject[geval] : item.modernObject;
+}
+
+function volledigeZinConfigPersoonlijk(item, geval) {
+  function bouw(modernZin, prefix, suffix, suffixDelen) {
+    return {
+      prefix,
+      suffix,
+      suffixDelen,
+      moderneZin: modernZin.charAt(0).toUpperCase() + modernZin.slice(1),
+    };
+  }
+
+  if (geval === "nominatief") {
+    // Het werkwoord is naamvals-/instellingsafhankelijk (du/gij/gijlieden
+    // vervoegen elk anders), dus dat woord moet in zin-modus exact kloppen
+    // en mag niet als "kleine typefout" worden goedgekeurd.
+    const historischeVorm = historischWerkwoordVormVoor(item);
+    return bouw(
+      `${item.modernSubject} ${item.werkwoordVorm} hard`,
+      "",
+      `${historischeVorm} hard`,
+      [
+        { tekst: historischeVorm, kritiek: true },
+        { tekst: "hard", kritiek: false },
+      ],
+    );
+  }
+  if (geval === "genitief") {
+    return bouw(`men denkt aan ${modernObjectVoor(item, "genitief")}`, "Men gedenke", "");
+  }
+  if (geval === "datief") {
+    return bouw(
+      `zij geeft ${modernObjectVoor(item, "datief")} een geschenk`,
+      "Zij geeft",
+      "een geschenk",
+    );
+  }
+  if (geval === "accusatief") {
+    return bouw(`zij ziet ${modernObjectVoor(item, "accusatief")}`, "Zij ziet", "");
+  }
+}
+
 // --- Instellingen (opgeslagen in localStorage, gelden voor alle oefeningen) ---
 const INSTELLING_MODUS_KEY = "adhnn_modus";
 
@@ -467,6 +658,34 @@ function zetToonGeslacht(tonen) {
 // werkt.
 function geslachtSuffix(geslacht) {
   return haalToonGeslachtOp() ? ` (${geslacht})` : "";
+}
+
+// Drie onafhankelijke instellingen om archaïsche/dialectische vormen wel of
+// niet mee te nemen bij de persoonlijke voornaamwoorden. Allemaal standaard
+// uit.
+const INSTELLING_ARCHAISCH_DU_KEY = "adhnn_archaisch_du";
+const INSTELLING_ARCHAISCH_GIJLIEDEN_KEY = "adhnn_archaisch_gijlieden";
+const INSTELLING_ARCHAISCH_WIJLIEDEN_KEY = "adhnn_archaisch_wijlieden";
+
+function haalArchaischDuOp() {
+  return localStorage.getItem(INSTELLING_ARCHAISCH_DU_KEY) === "aan";
+}
+function zetArchaischDu(aan) {
+  localStorage.setItem(INSTELLING_ARCHAISCH_DU_KEY, aan ? "aan" : "uit");
+}
+
+function haalArchaischGijliedenOp() {
+  return localStorage.getItem(INSTELLING_ARCHAISCH_GIJLIEDEN_KEY) === "aan";
+}
+function zetArchaischGijlieden(aan) {
+  localStorage.setItem(INSTELLING_ARCHAISCH_GIJLIEDEN_KEY, aan ? "aan" : "uit");
+}
+
+function haalArchaischWijliedenOp() {
+  return localStorage.getItem(INSTELLING_ARCHAISCH_WIJLIEDEN_KEY) === "aan";
+}
+function zetArchaischWijlieden(aan) {
+  localStorage.setItem(INSTELLING_ARCHAISCH_WIJLIEDEN_KEY, aan ? "aan" : "uit");
 }
 
 const INSTELLING_TIJD_KEY = "adhnn_tijdslimiet_minuten";

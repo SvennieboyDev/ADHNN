@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Instellingen — App der historische Nederlandse naamvallen</title>
-  <link rel="stylesheet" href="style.css?v=5">
+  <link rel="stylesheet" href="style.css?v=7">
 </head>
 <body>
   <main class="instellingen-screen">
@@ -39,7 +39,7 @@
         </label>
       </fieldset>
 
-      <fieldset>
+      <fieldset id="geslacht-fieldset">
         <legend>Geslacht bij het zelfstandig naamwoord</legend>
 
         <label class="instelling-optie">
@@ -57,6 +57,31 @@
             <strong>Verberg geslacht</strong>
             <br>
             Voor als je je geheugen wilt trainen.
+          </span>
+        </label>
+      </fieldset>
+
+      <fieldset id="archaisch-fieldset" hidden>
+        <legend>Archaïsche/dialectische vormen</legend>
+
+        <label class="instelling-optie">
+          <input type="checkbox" name="archaisch-du">
+          <span>
+            <strong>Du</strong> in plaats van gij (voor jij/u)
+          </span>
+        </label>
+
+        <label class="instelling-optie">
+          <input type="checkbox" name="archaisch-gijlieden">
+          <span>
+            <strong>Gijlieden</strong> in plaats van gij (voor jullie)
+          </span>
+        </label>
+
+        <label class="instelling-optie">
+          <input type="checkbox" name="archaisch-wijlieden">
+          <span>
+            <strong>Wijlieden</strong> in plaats van wij
           </span>
         </label>
       </fieldset>
@@ -97,7 +122,7 @@
     </form>
   </main>
 
-  <script src="js/oefening-data.js?v=5"></script>
-  <script src="js/instellingen.js?v=5"></script>
+  <script src="js/oefening-data.js?v=7"></script>
+  <script src="js/instellingen.js?v=7"></script>
 </body>
 </html>

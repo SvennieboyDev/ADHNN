@@ -127,12 +127,14 @@ function beoordeelZin(waarde, config, kritiekVormen) {
   return besteResultaat;
 }
 
-// Bouwt de volledige zin op basis van de (eerste) juiste kandidaat, voor de
-// "antwoord tonen"-knop in zin-modus.
+// Bouwt de volledige zin op voor de "antwoord tonen"-knop in zin-modus. Zijn
+// er meerdere geldige naamvalsvormen, dan worden die allemaal getoond,
+// gescheiden door " / ".
 function volledigeZinTekst(config, kritiekVormen) {
+  const middenTekst = alsLijst(kritiekVormen).join(" / ");
   const segmenten = [
     ...segmentenVan(config.prefixDelen, config.prefix),
-    ...alsLijst(kritiekVormen)[0].split(" ").map((t) => ({ tekst: t })),
+    { tekst: middenTekst },
     ...segmentenVan(config.suffixDelen, config.suffix),
   ];
   const tekst = segmenten.map((s) => s.tekst).join(" ");
@@ -147,6 +149,7 @@ function startOefening({
   titelFn = standaardTitel,
   ondertitelFn = () => null,
   woordenFilterFn = null,
+  woordenBronFn = laadWoorden,
 }) {
   let woorden = [];
   let modus = "deel";
@@ -403,7 +406,7 @@ function startOefening({
           juist: alsLijst(verwacht).some((optie) => normaliseer(waarde) === normaliseer(optie)),
           typo: false,
         });
-        antwoordTekstFn = () => alsLijst(verwacht)[0];
+        antwoordTekstFn = () => alsLijst(verwacht).join(" / ");
       }
 
       inputsByCase[geval] = input;
@@ -464,7 +467,7 @@ function startOefening({
     }
   }
 
-  laadWoorden()
+  woordenBronFn()
     .then((data) => {
       modus = haalModusOp();
       const gefilterd = woordenFilterFn ? data.filter(woordenFilterFn) : data;
