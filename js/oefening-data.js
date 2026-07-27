@@ -412,8 +412,11 @@ function zinsdelenBijvGemengd(woordObj, geval) {
 
 function volledigeZinConfigBijvGemengd(woordObj, geval) {
   const g = woordObj.geslacht;
+  const adjectief = kiesBijvoeglijkNaamwoord(woordObj);
   const modernDet = "een"; // modern onbepaald lidwoord verbuigt niet
-  const modernAdj = BIJV_ZWAK_VORMEN_ENKEL[kiesBijvoeglijkNaamwoord(woordObj)].e;
+  // Modern Nederlands: na "een" krijgt het bijvoeglijk naamwoord alleen "-e"
+  // bij een de-woord; bij een het-woord blijft het onverbogen ("een oud gevoel").
+  const modernAdj = g === "o" ? adjectief : BIJV_ZWAK_VORMEN_ENKEL[adjectief].e;
   const modernNoun = woordObj.woord;
   const noun = naamwoordVormVoorZin(woordObj, geval);
 
