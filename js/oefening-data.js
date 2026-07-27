@@ -459,22 +459,26 @@ const PERSOONLIJKE_VOORNAAMWOORDEN = [
     id: "jij",
     label: "jij",
     werkwoordVorm: "loopt",
+    // "du" vervoegt met -st (du loopst), net als in het Duits/Engels ("thou
+    // walkest") — dat is een andere uitgang dan de -t van "gij" (gij loopt).
+    historischWerkwoordVorm: () => (haalArchaischDuOp() ? "loopst" : "loopt"),
     modernSubject: "jij",
     modernObject: "jou",
     vorm: () =>
       haalArchaischDuOp()
-        ? { nominatief: "du", genitief: "dijner", datief: "di", accusatief: "di" }
+        ? { nominatief: "du", genitief: ["dijner", "diner"], datief: ["di", "dij"], accusatief: ["di", "dij"] }
         : { nominatief: "gij", genitief: "uwer", datief: "u", accusatief: "u" },
   },
   {
     id: "u",
     label: "u",
     werkwoordVorm: "loopt",
+    historischWerkwoordVorm: () => (haalArchaischDuOp() ? "loopst" : "loopt"),
     modernSubject: "u",
     modernObject: "u",
     vorm: () =>
       haalArchaischDuOp()
-        ? { nominatief: "du", genitief: "dijner", datief: "di", accusatief: "di" }
+        ? { nominatief: "du", genitief: ["dijner", "diner"], datief: ["di", "dij"], accusatief: ["di", "dij"] }
         : { nominatief: "gij", genitief: "uwer", datief: "u", accusatief: "u" },
   },
   {
@@ -541,7 +545,10 @@ const PERSOONLIJKE_VOORNAAMWOORDEN = [
     label: "zij (meervoud)",
     werkwoordVorm: "lopen",
     modernSubject: "zij",
-    modernObject: "hen",
+    // In modern Nederlands is er een naamvalsonderscheid overgebleven: "hun"
+    // als meewerkend voorwerp (datief), "hen" als lijdend voorwerp
+    // (accusatief) of na een voorzetsel (genitief-zin "denkt aan hen").
+    modernObject: { genitief: "hen", datief: "hun", accusatief: "hen" },
     vorm: () => ({ nominatief: "zij", genitief: "hunner", datief: "hun", accusatief: "hen" }),
   },
 ];
@@ -581,26 +588,47 @@ function zinsdelenPersoonlijk(item, geval) {
 // ("denkt aan") dan in de historische vorm ("gedenke"): een genitief-
 // voornaamwoord zonder voorzetsel bestaat in modern Nederlands namelijk niet
 // meer, dus de "vertaling" zit hier ook al deels in het werkwoord zelf.
+function modernObjectVoor(item, geval) {
+  return typeof item.modernObject === "object" ? item.modernObject[geval] : item.modernObject;
+}
+
 function volledigeZinConfigPersoonlijk(item, geval) {
-  function bouw(modernZin, prefix, suffix) {
-    return { prefix, suffix, moderneZin: modernZin.charAt(0).toUpperCase() + modernZin.slice(1) };
+  function bouw(modernZin, prefix, suffix, suffixDelen) {
+    return {
+      prefix,
+      suffix,
+      suffixDelen,
+      moderneZin: modernZin.charAt(0).toUpperCase() + modernZin.slice(1),
+    };
   }
 
   if (geval === "nominatief") {
+    // Het werkwoord is naamvals-/instellingsafhankelijk (du/gij/gijlieden
+    // vervoegen elk anders), dus dat woord moet in zin-modus exact kloppen
+    // en mag niet als "kleine typefout" worden goedgekeurd.
+    const historischeVorm = historischWerkwoordVormVoor(item);
     return bouw(
       `${item.modernSubject} ${item.werkwoordVorm} hard`,
       "",
-      `${historischWerkwoordVormVoor(item)} hard`,
+      `${historischeVorm} hard`,
+      [
+        { tekst: historischeVorm, kritiek: true },
+        { tekst: "hard", kritiek: false },
+      ],
     );
   }
   if (geval === "genitief") {
-    return bouw(`men denkt aan ${item.modernObject}`, "Men gedenke", "");
+    return bouw(`men denkt aan ${modernObjectVoor(item, "genitief")}`, "Men gedenke", "");
   }
   if (geval === "datief") {
-    return bouw(`zij geeft ${item.modernObject} een geschenk`, "Zij geeft", "een geschenk");
+    return bouw(
+      `zij geeft ${modernObjectVoor(item, "datief")} een geschenk`,
+      "Zij geeft",
+      "een geschenk",
+    );
   }
   if (geval === "accusatief") {
-    return bouw(`zij ziet ${item.modernObject}`, "Zij ziet", "");
+    return bouw(`zij ziet ${modernObjectVoor(item, "accusatief")}`, "Zij ziet", "");
   }
 }
 
