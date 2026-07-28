@@ -739,13 +739,13 @@ function geslachtSuffix(geslacht) {
 }
 
 // Bepaalt hoe de datief van het zelfstandig naamwoord zelf gevormd wordt:
-// "tabel" = de gangbare vorm, zonder extra -e ook al zou dat historisch
-// gekund hebben; "historisch" = met de extra -e waar het woordenbestand
-// (datief_e) aangeeft dat die natuurlijk is; "modern" = bij onzijdige
-// woorden de alternatieve vorm met "het" i.p.v. "den" (en het bijvoeglijk
-// naamwoord onverbogen). Geldt voor elke oefening met een zelfstandig
-// naamwoord (lidwoorden + alle bijvoeglijk-naamwoord-categorieën).
-// Standaard de gangbare tabelvorm.
+// "tabel" = vervoegen volgens de regels, zonder extra -e ook al zou dat
+// historisch gekund hebben; "historisch" = met de extra -e waar het
+// woordenbestand (datief_e) aangeeft dat die natuurlijk is; "modern" = bij
+// onzijdige woorden de alternatieve vorm met "het" i.p.v. "den" (en het
+// bijvoeglijk naamwoord onverbogen). Geldt voor elke oefening met een
+// zelfstandig naamwoord (lidwoorden + alle bijvoeglijk-naamwoord-
+// categorieën). Standaard "tabel" (vervoegen volgens de regels).
 const INSTELLING_DATIEF_VORM_KEY = "adhnn_datief_vorm";
 
 function haalDatiefVormOp() {
