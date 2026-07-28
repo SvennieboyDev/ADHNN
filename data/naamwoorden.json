@@ -1,107 +1,596 @@
 {
-  "beschrijving": "100 Nederlandse zelfstandige naamwoorden met historisch geslacht voor het oefenen van naamvallen. Veld 'geslacht': m = mannelijk, v = vrouwelijk, o = onzijdig. Veld 'zwakke_genitief': true betekent genitief enkelvoud op -en (des graven) i.p.v. -s (des konings). Veld 'let_op' markeert contra-intuïtieve gevallen waar het moderne de/het-gevoel misleidt.",
+  "beschrijving": "100 Nederlandse zelfstandige naamwoorden met historisch geslacht voor het oefenen van naamvallen. Veld 'geslacht': m = mannelijk, v = vrouwelijk, o = onzijdig. Veld 'zwakke_genitief': true = genitief enkelvoud op -en (des graven) i.p.v. -s (des konings). Veld 'datief_e' (alleen bij m/o): true = de volle historische datief op -e is natuurlijk (den goeden gelde); false = gebruik alleen de gangbare datief (het goede geld / den goeden man met kaal woord). Vrouwelijke woorden hebben geen datief_e-veld: zij krijgen in het enkelvoud geen uitgang. Veld 'let_op' markeert contra-intuitieve gevallen.",
   "woorden": [
-    { "woord": "koning",      "geslacht": "m", "zwakke_genitief": false },
-    { "woord": "man",         "geslacht": "m", "zwakke_genitief": false },
-    { "woord": "zoon",        "geslacht": "m", "zwakke_genitief": false },
-    { "woord": "vader",       "geslacht": "m", "zwakke_genitief": false },
-    { "woord": "broer",       "geslacht": "m", "zwakke_genitief": false },
-    { "woord": "heer",        "geslacht": "m", "zwakke_genitief": true },
-    { "woord": "graaf",       "geslacht": "m", "zwakke_genitief": true },
-    { "woord": "vorst",       "geslacht": "m", "zwakke_genitief": true },
-    { "woord": "prins",       "geslacht": "m", "zwakke_genitief": true },
-    { "woord": "held",        "geslacht": "m", "zwakke_genitief": true },
-    { "woord": "boer",        "geslacht": "m", "zwakke_genitief": true },
-    { "woord": "mens",        "geslacht": "m", "zwakke_genitief": true },
-    { "woord": "hertog",      "geslacht": "m", "zwakke_genitief": true },
-    { "woord": "gezel",       "geslacht": "m", "zwakke_genitief": true },
-    { "woord": "knaap",       "geslacht": "m", "zwakke_genitief": true },
-    { "woord": "bode",        "geslacht": "m", "zwakke_genitief": true },
-    { "woord": "bakker",      "geslacht": "m", "zwakke_genitief": false, "let_op": "persoon op -er maar toch -s, niet -en" },
-    { "woord": "koopman",     "geslacht": "m", "zwakke_genitief": false },
-    { "woord": "ridder",      "geslacht": "m", "zwakke_genitief": false },
-    { "woord": "visser",      "geslacht": "m", "zwakke_genitief": false },
-    { "woord": "dag",         "geslacht": "m", "zwakke_genitief": false },
-    { "woord": "tijd",        "geslacht": "m", "zwakke_genitief": false, "let_op": "mannelijk, niet vrouwelijk zoals gevoel soms zegt" },
-    { "woord": "nacht",       "geslacht": "m", "zwakke_genitief": false },
-    { "woord": "berg",        "geslacht": "m", "zwakke_genitief": false },
-    { "woord": "steen",       "geslacht": "m", "zwakke_genitief": false },
-    { "woord": "boom",        "geslacht": "m", "zwakke_genitief": false },
-    { "woord": "weg",         "geslacht": "m", "zwakke_genitief": false },
-    { "woord": "troon",       "geslacht": "m", "zwakke_genitief": false },
-    { "woord": "brief",       "geslacht": "m", "zwakke_genitief": false },
-    { "woord": "hemel",       "geslacht": "m", "zwakke_genitief": false },
-    { "woord": "muur",        "geslacht": "m", "zwakke_genitief": false, "let_op": "mannelijk" },
-    { "woord": "stoel",       "geslacht": "m", "zwakke_genitief": false },
-    { "woord": "arm",         "geslacht": "m", "zwakke_genitief": false },
-    { "woord": "voet",        "geslacht": "m", "zwakke_genitief": false },
-    { "woord": "vrouw",       "geslacht": "v", "zwakke_genitief": false },
-    { "woord": "dochter",     "geslacht": "v", "zwakke_genitief": false },
-    { "woord": "moeder",      "geslacht": "v", "zwakke_genitief": false },
-    { "woord": "zuster",      "geslacht": "v", "zwakke_genitief": false },
-    { "woord": "koningin",    "geslacht": "v", "zwakke_genitief": false },
-    { "woord": "stad",        "geslacht": "v", "zwakke_genitief": false, "let_op": "vrouwelijk" },
-    { "woord": "markt",       "geslacht": "v", "zwakke_genitief": false, "let_op": "vrouwelijk, voelt vaak mannelijk" },
-    { "woord": "kerk",        "geslacht": "v", "zwakke_genitief": false },
-    { "woord": "poort",       "geslacht": "v", "zwakke_genitief": false },
-    { "woord": "zaal",        "geslacht": "v", "zwakke_genitief": false, "let_op": "vrouwelijk" },
-    { "woord": "deur",        "geslacht": "v", "zwakke_genitief": false },
-    { "woord": "hand",        "geslacht": "v", "zwakke_genitief": false },
-    { "woord": "macht",       "geslacht": "v", "zwakke_genitief": false, "let_op": "-cht woorden vaak vrouwelijk" },
-    { "woord": "kracht",      "geslacht": "v", "zwakke_genitief": false },
-    { "woord": "vrucht",      "geslacht": "v", "zwakke_genitief": false },
-    { "woord": "gunst",       "geslacht": "v", "zwakke_genitief": false, "let_op": "-st vrouwelijk" },
-    { "woord": "kunst",       "geslacht": "v", "zwakke_genitief": false },
-    { "woord": "deugd",       "geslacht": "v", "zwakke_genitief": false, "let_op": "vrouwelijk" },
-    { "woord": "jeugd",       "geslacht": "v", "zwakke_genitief": false },
-    { "woord": "wereld",      "geslacht": "v", "zwakke_genitief": false },
-    { "woord": "aarde",       "geslacht": "v", "zwakke_genitief": false },
-    { "woord": "zon",         "geslacht": "v", "zwakke_genitief": false },
-    { "woord": "maan",        "geslacht": "v", "zwakke_genitief": false },
-    { "woord": "zee",         "geslacht": "v", "zwakke_genitief": false },
-    { "woord": "bron",        "geslacht": "v", "zwakke_genitief": false },
-    { "woord": "beloning",    "geslacht": "v", "zwakke_genitief": false, "let_op": "-ing altijd vrouwelijk" },
-    { "woord": "hoop",        "geslacht": "v", "zwakke_genitief": false },
-    { "woord": "liefde",      "geslacht": "v", "zwakke_genitief": false, "let_op": "-de vrouwelijk" },
-    { "woord": "vreugde",     "geslacht": "v", "zwakke_genitief": false },
-    { "woord": "waarheid",    "geslacht": "v", "zwakke_genitief": false, "let_op": "-heid vrouwelijk" },
-    { "woord": "goedheid",    "geslacht": "v", "zwakke_genitief": false },
-    { "woord": "vrijheid",    "geslacht": "v", "zwakke_genitief": false },
-    { "woord": "wijsheid",    "geslacht": "v", "zwakke_genitief": false },
-    { "woord": "menigte",     "geslacht": "v", "zwakke_genitief": false, "let_op": "-te vrouwelijk" },
-    { "woord": "schoonheid",  "geslacht": "v", "zwakke_genitief": false },
-    { "woord": "natie",       "geslacht": "v", "zwakke_genitief": false, "let_op": "-tie vrouwelijk" },
-    { "woord": "trouw",       "geslacht": "v", "zwakke_genitief": false },
-    { "woord": "ziel",        "geslacht": "v", "zwakke_genitief": false },
-    { "woord": "wet",         "geslacht": "v", "zwakke_genitief": false, "let_op": "vrouwelijk" },
-    { "woord": "taal",        "geslacht": "v", "zwakke_genitief": false },
-    { "woord": "hut",         "geslacht": "v", "zwakke_genitief": false },
-    { "woord": "brug",        "geslacht": "v", "zwakke_genitief": false },
-    { "woord": "huis",        "geslacht": "o", "zwakke_genitief": false },
-    { "woord": "land",        "geslacht": "o", "zwakke_genitief": false },
-    { "woord": "rijk",        "geslacht": "o", "zwakke_genitief": false },
-    { "woord": "koninkrijk",  "geslacht": "o", "zwakke_genitief": false, "let_op": "onzijdig" },
-    { "woord": "paleis",      "geslacht": "o", "zwakke_genitief": false, "let_op": "onzijdig" },
-    { "woord": "kasteel",     "geslacht": "o", "zwakke_genitief": false },
-    { "woord": "dorp",        "geslacht": "o", "zwakke_genitief": false },
-    { "woord": "volk",        "geslacht": "o", "zwakke_genitief": false },
-    { "woord": "kind",        "geslacht": "o", "zwakke_genitief": false },
-    { "woord": "hart",        "geslacht": "o", "zwakke_genitief": false },
-    { "woord": "hoofd",       "geslacht": "o", "zwakke_genitief": false },
-    { "woord": "woord",       "geslacht": "o", "zwakke_genitief": false },
-    { "woord": "geld",        "geslacht": "o", "zwakke_genitief": false },
-    { "woord": "goud",        "geslacht": "o", "zwakke_genitief": false },
-    { "woord": "brood",       "geslacht": "o", "zwakke_genitief": false },
-    { "woord": "licht",       "geslacht": "o", "zwakke_genitief": false, "let_op": "onzijdig, niet vrouwelijk" },
-    { "woord": "vuur",        "geslacht": "o", "zwakke_genitief": false },
-    { "woord": "water",       "geslacht": "o", "zwakke_genitief": false },
-    { "woord": "bloed",       "geslacht": "o", "zwakke_genitief": false },
-    { "woord": "leven",       "geslacht": "o", "zwakke_genitief": false, "let_op": "zelfstandig gebruikt werkwoord, onzijdig" },
-    { "woord": "geschenk",    "geslacht": "o", "zwakke_genitief": false, "let_op": "ge- onzijdig" },
-    { "woord": "gebergte",    "geslacht": "o", "zwakke_genitief": false, "let_op": "ge-...-te onzijdig" },
-    { "woord": "geloof",      "geslacht": "o", "zwakke_genitief": false },
-    { "woord": "gevoel",      "geslacht": "o", "zwakke_genitief": false },
-    { "woord": "boek",        "geslacht": "o", "zwakke_genitief": false },
-    { "woord": "veld",        "geslacht": "o", "zwakke_genitief": false }
+    {
+      "woord": "koning",
+      "geslacht": "m",
+      "zwakke_genitief": false,
+      "datief_e": false
+    },
+    {
+      "woord": "man",
+      "geslacht": "m",
+      "zwakke_genitief": false,
+      "datief_e": true
+    },
+    {
+      "woord": "zoon",
+      "geslacht": "m",
+      "zwakke_genitief": false,
+      "datief_e": true
+    },
+    {
+      "woord": "vader",
+      "geslacht": "m",
+      "zwakke_genitief": false,
+      "datief_e": false
+    },
+    {
+      "woord": "broer",
+      "geslacht": "m",
+      "zwakke_genitief": false,
+      "datief_e": true
+    },
+    {
+      "woord": "heer",
+      "geslacht": "m",
+      "zwakke_genitief": true,
+      "datief_e": true
+    },
+    {
+      "woord": "graaf",
+      "geslacht": "m",
+      "zwakke_genitief": true,
+      "datief_e": true
+    },
+    {
+      "woord": "vorst",
+      "geslacht": "m",
+      "zwakke_genitief": true,
+      "datief_e": true
+    },
+    {
+      "woord": "prins",
+      "geslacht": "m",
+      "zwakke_genitief": true,
+      "datief_e": true
+    },
+    {
+      "woord": "held",
+      "geslacht": "m",
+      "zwakke_genitief": true,
+      "datief_e": true
+    },
+    {
+      "woord": "boer",
+      "geslacht": "m",
+      "zwakke_genitief": true,
+      "datief_e": true
+    },
+    {
+      "woord": "mens",
+      "geslacht": "m",
+      "zwakke_genitief": true,
+      "datief_e": true
+    },
+    {
+      "woord": "hertog",
+      "geslacht": "m",
+      "zwakke_genitief": true,
+      "datief_e": false
+    },
+    {
+      "woord": "gezel",
+      "geslacht": "m",
+      "zwakke_genitief": true,
+      "datief_e": false
+    },
+    {
+      "woord": "knaap",
+      "geslacht": "m",
+      "zwakke_genitief": true,
+      "datief_e": true
+    },
+    {
+      "woord": "bode",
+      "geslacht": "m",
+      "zwakke_genitief": true,
+      "datief_e": false
+    },
+    {
+      "woord": "bakker",
+      "geslacht": "m",
+      "zwakke_genitief": false,
+      "let_op": "persoon op -er maar toch -s, niet -en",
+      "datief_e": false
+    },
+    {
+      "woord": "koopman",
+      "geslacht": "m",
+      "zwakke_genitief": false,
+      "datief_e": false
+    },
+    {
+      "woord": "ridder",
+      "geslacht": "m",
+      "zwakke_genitief": false,
+      "datief_e": false
+    },
+    {
+      "woord": "visser",
+      "geslacht": "m",
+      "zwakke_genitief": false,
+      "datief_e": false
+    },
+    {
+      "woord": "dag",
+      "geslacht": "m",
+      "zwakke_genitief": false,
+      "datief_e": true
+    },
+    {
+      "woord": "tijd",
+      "geslacht": "m",
+      "zwakke_genitief": false,
+      "let_op": "mannelijk, niet vrouwelijk zoals gevoel soms zegt",
+      "datief_e": true
+    },
+    {
+      "woord": "nacht",
+      "geslacht": "m",
+      "zwakke_genitief": false,
+      "datief_e": true
+    },
+    {
+      "woord": "berg",
+      "geslacht": "m",
+      "zwakke_genitief": false,
+      "datief_e": true
+    },
+    {
+      "woord": "steen",
+      "geslacht": "m",
+      "zwakke_genitief": false,
+      "datief_e": true
+    },
+    {
+      "woord": "boom",
+      "geslacht": "m",
+      "zwakke_genitief": false,
+      "datief_e": true
+    },
+    {
+      "woord": "weg",
+      "geslacht": "m",
+      "zwakke_genitief": false,
+      "datief_e": true
+    },
+    {
+      "woord": "troon",
+      "geslacht": "m",
+      "zwakke_genitief": false,
+      "datief_e": true
+    },
+    {
+      "woord": "brief",
+      "geslacht": "m",
+      "zwakke_genitief": false,
+      "datief_e": true
+    },
+    {
+      "woord": "hemel",
+      "geslacht": "m",
+      "zwakke_genitief": false,
+      "datief_e": false
+    },
+    {
+      "woord": "muur",
+      "geslacht": "m",
+      "zwakke_genitief": false,
+      "let_op": "mannelijk",
+      "datief_e": true
+    },
+    {
+      "woord": "stoel",
+      "geslacht": "m",
+      "zwakke_genitief": false,
+      "datief_e": true
+    },
+    {
+      "woord": "arm",
+      "geslacht": "m",
+      "zwakke_genitief": false,
+      "datief_e": true
+    },
+    {
+      "woord": "voet",
+      "geslacht": "m",
+      "zwakke_genitief": false,
+      "datief_e": true
+    },
+    {
+      "woord": "vrouw",
+      "geslacht": "v",
+      "zwakke_genitief": false
+    },
+    {
+      "woord": "dochter",
+      "geslacht": "v",
+      "zwakke_genitief": false
+    },
+    {
+      "woord": "moeder",
+      "geslacht": "v",
+      "zwakke_genitief": false
+    },
+    {
+      "woord": "zuster",
+      "geslacht": "v",
+      "zwakke_genitief": false
+    },
+    {
+      "woord": "koningin",
+      "geslacht": "v",
+      "zwakke_genitief": false
+    },
+    {
+      "woord": "stad",
+      "geslacht": "v",
+      "zwakke_genitief": false,
+      "let_op": "vrouwelijk"
+    },
+    {
+      "woord": "markt",
+      "geslacht": "v",
+      "zwakke_genitief": false,
+      "let_op": "vrouwelijk, voelt vaak mannelijk"
+    },
+    {
+      "woord": "kerk",
+      "geslacht": "v",
+      "zwakke_genitief": false
+    },
+    {
+      "woord": "poort",
+      "geslacht": "v",
+      "zwakke_genitief": false
+    },
+    {
+      "woord": "zaal",
+      "geslacht": "v",
+      "zwakke_genitief": false,
+      "let_op": "vrouwelijk"
+    },
+    {
+      "woord": "deur",
+      "geslacht": "v",
+      "zwakke_genitief": false
+    },
+    {
+      "woord": "hand",
+      "geslacht": "v",
+      "zwakke_genitief": false
+    },
+    {
+      "woord": "macht",
+      "geslacht": "v",
+      "zwakke_genitief": false,
+      "let_op": "-cht woorden vaak vrouwelijk"
+    },
+    {
+      "woord": "kracht",
+      "geslacht": "v",
+      "zwakke_genitief": false
+    },
+    {
+      "woord": "vrucht",
+      "geslacht": "v",
+      "zwakke_genitief": false
+    },
+    {
+      "woord": "gunst",
+      "geslacht": "v",
+      "zwakke_genitief": false,
+      "let_op": "-st vrouwelijk"
+    },
+    {
+      "woord": "kunst",
+      "geslacht": "v",
+      "zwakke_genitief": false
+    },
+    {
+      "woord": "deugd",
+      "geslacht": "v",
+      "zwakke_genitief": false,
+      "let_op": "vrouwelijk"
+    },
+    {
+      "woord": "jeugd",
+      "geslacht": "v",
+      "zwakke_genitief": false
+    },
+    {
+      "woord": "wereld",
+      "geslacht": "v",
+      "zwakke_genitief": false
+    },
+    {
+      "woord": "aarde",
+      "geslacht": "v",
+      "zwakke_genitief": false
+    },
+    {
+      "woord": "zon",
+      "geslacht": "v",
+      "zwakke_genitief": false
+    },
+    {
+      "woord": "maan",
+      "geslacht": "v",
+      "zwakke_genitief": false
+    },
+    {
+      "woord": "zee",
+      "geslacht": "v",
+      "zwakke_genitief": false
+    },
+    {
+      "woord": "bron",
+      "geslacht": "v",
+      "zwakke_genitief": false
+    },
+    {
+      "woord": "beloning",
+      "geslacht": "v",
+      "zwakke_genitief": false,
+      "let_op": "-ing altijd vrouwelijk"
+    },
+    {
+      "woord": "hoop",
+      "geslacht": "v",
+      "zwakke_genitief": false
+    },
+    {
+      "woord": "liefde",
+      "geslacht": "v",
+      "zwakke_genitief": false,
+      "let_op": "-de vrouwelijk"
+    },
+    {
+      "woord": "vreugde",
+      "geslacht": "v",
+      "zwakke_genitief": false
+    },
+    {
+      "woord": "waarheid",
+      "geslacht": "v",
+      "zwakke_genitief": false,
+      "let_op": "-heid vrouwelijk"
+    },
+    {
+      "woord": "goedheid",
+      "geslacht": "v",
+      "zwakke_genitief": false
+    },
+    {
+      "woord": "vrijheid",
+      "geslacht": "v",
+      "zwakke_genitief": false
+    },
+    {
+      "woord": "wijsheid",
+      "geslacht": "v",
+      "zwakke_genitief": false
+    },
+    {
+      "woord": "menigte",
+      "geslacht": "v",
+      "zwakke_genitief": false,
+      "let_op": "-te vrouwelijk"
+    },
+    {
+      "woord": "schoonheid",
+      "geslacht": "v",
+      "zwakke_genitief": false
+    },
+    {
+      "woord": "natie",
+      "geslacht": "v",
+      "zwakke_genitief": false,
+      "let_op": "-tie vrouwelijk"
+    },
+    {
+      "woord": "trouw",
+      "geslacht": "v",
+      "zwakke_genitief": false
+    },
+    {
+      "woord": "ziel",
+      "geslacht": "v",
+      "zwakke_genitief": false
+    },
+    {
+      "woord": "wet",
+      "geslacht": "v",
+      "zwakke_genitief": false,
+      "let_op": "vrouwelijk"
+    },
+    {
+      "woord": "taal",
+      "geslacht": "v",
+      "zwakke_genitief": false
+    },
+    {
+      "woord": "hut",
+      "geslacht": "v",
+      "zwakke_genitief": false
+    },
+    {
+      "woord": "brug",
+      "geslacht": "v",
+      "zwakke_genitief": false
+    },
+    {
+      "woord": "huis",
+      "geslacht": "o",
+      "zwakke_genitief": false,
+      "datief_e": true
+    },
+    {
+      "woord": "land",
+      "geslacht": "o",
+      "zwakke_genitief": false,
+      "datief_e": true
+    },
+    {
+      "woord": "rijk",
+      "geslacht": "o",
+      "zwakke_genitief": false,
+      "datief_e": true
+    },
+    {
+      "woord": "koninkrijk",
+      "geslacht": "o",
+      "zwakke_genitief": false,
+      "let_op": "onzijdig",
+      "datief_e": false
+    },
+    {
+      "woord": "paleis",
+      "geslacht": "o",
+      "zwakke_genitief": false,
+      "let_op": "onzijdig",
+      "datief_e": false
+    },
+    {
+      "woord": "kasteel",
+      "geslacht": "o",
+      "zwakke_genitief": false,
+      "datief_e": false
+    },
+    {
+      "woord": "dorp",
+      "geslacht": "o",
+      "zwakke_genitief": false,
+      "datief_e": true
+    },
+    {
+      "woord": "volk",
+      "geslacht": "o",
+      "zwakke_genitief": false,
+      "datief_e": true
+    },
+    {
+      "woord": "kind",
+      "geslacht": "o",
+      "zwakke_genitief": false,
+      "datief_e": true
+    },
+    {
+      "woord": "hart",
+      "geslacht": "o",
+      "zwakke_genitief": false,
+      "datief_e": true
+    },
+    {
+      "woord": "hoofd",
+      "geslacht": "o",
+      "zwakke_genitief": false,
+      "datief_e": true
+    },
+    {
+      "woord": "woord",
+      "geslacht": "o",
+      "zwakke_genitief": false,
+      "datief_e": true
+    },
+    {
+      "woord": "geld",
+      "geslacht": "o",
+      "zwakke_genitief": false,
+      "datief_e": true
+    },
+    {
+      "woord": "goud",
+      "geslacht": "o",
+      "zwakke_genitief": false,
+      "datief_e": true
+    },
+    {
+      "woord": "brood",
+      "geslacht": "o",
+      "zwakke_genitief": false,
+      "datief_e": true
+    },
+    {
+      "woord": "licht",
+      "geslacht": "o",
+      "zwakke_genitief": false,
+      "let_op": "onzijdig, niet vrouwelijk",
+      "datief_e": true
+    },
+    {
+      "woord": "vuur",
+      "geslacht": "o",
+      "zwakke_genitief": false,
+      "datief_e": true
+    },
+    {
+      "woord": "water",
+      "geslacht": "o",
+      "zwakke_genitief": false,
+      "datief_e": false
+    },
+    {
+      "woord": "bloed",
+      "geslacht": "o",
+      "zwakke_genitief": false,
+      "datief_e": true
+    },
+    {
+      "woord": "leven",
+      "geslacht": "o",
+      "zwakke_genitief": false,
+      "let_op": "zelfstandig gebruikt werkwoord, onzijdig",
+      "datief_e": false
+    },
+    {
+      "woord": "geschenk",
+      "geslacht": "o",
+      "zwakke_genitief": false,
+      "let_op": "ge- onzijdig",
+      "datief_e": false
+    },
+    {
+      "woord": "gebergte",
+      "geslacht": "o",
+      "zwakke_genitief": false,
+      "let_op": "ge-...-te onzijdig",
+      "datief_e": false
+    },
+    {
+      "woord": "geloof",
+      "geslacht": "o",
+      "zwakke_genitief": false,
+      "datief_e": false
+    },
+    {
+      "woord": "gevoel",
+      "geslacht": "o",
+      "zwakke_genitief": false,
+      "datief_e": false
+    },
+    {
+      "woord": "boek",
+      "geslacht": "o",
+      "zwakke_genitief": false,
+      "datief_e": true
+    },
+    {
+      "woord": "veld",
+      "geslacht": "o",
+      "zwakke_genitief": false,
+      "datief_e": true
+    }
   ]
 }

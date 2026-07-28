@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Instellingen — App der historische Nederlandse naamvallen</title>
-  <link rel="stylesheet" href="style.css?v=7">
+  <link rel="stylesheet" href="style.css?v=8">
 </head>
 <body>
   <main class="instellingen-screen">
@@ -68,6 +68,10 @@
           <input type="checkbox" name="archaisch-du">
           <span>
             <strong>Du</strong> in plaats van gij (voor jij/u)
+            <span class="instelling-waarschuwing">
+              Let op: dit is zeer archaïsch en heeft ook invloed op de rest van de zin
+              (zoals de werkwoordsvervoeging). Niet aangeraden voor beginners.
+            </span>
           </span>
         </label>
 
@@ -82,6 +86,29 @@
           <input type="checkbox" name="archaisch-wijlieden">
           <span>
             <strong>Wijlieden</strong> in plaats van wij
+          </span>
+        </label>
+      </fieldset>
+
+      <fieldset id="genitief-vnw-fieldset" hidden>
+        <legend>Genitief bij persoonlijke voornaamwoorden</legend>
+
+        <label class="instelling-optie">
+          <input type="radio" name="genitief-vnw" value="uit">
+          <span>
+            <strong>Verberg genitief</strong>
+            <br>
+            In het echt komt de genitief van persoonlijke voornaamwoorden nog maar zelden voor,
+            dus is het voor de meesten niet de moeite waard om te leren.
+          </span>
+        </label>
+
+        <label class="instelling-optie">
+          <input type="radio" name="genitief-vnw" value="aan">
+          <span>
+            <strong>Toon genitief</strong>
+            <br>
+            Oefen ook de (zeldzame) genitiefvorm mee.
           </span>
         </label>
       </fieldset>
@@ -122,7 +149,7 @@
     </form>
   </main>
 
-  <script src="js/oefening-data.js?v=7"></script>
-  <script src="js/instellingen.js?v=7"></script>
+  <script src="js/oefening-data.js?v=8"></script>
+  <script src="js/instellingen.js?v=8"></script>
 </body>
 </html>

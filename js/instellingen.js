@@ -32,6 +32,14 @@ if (heeftArchaischeVormen) {
   document.querySelector('input[name="archaisch-wijlieden"]').checked = haalArchaischWijliedenOp();
 }
 
+const genitiefVnwFieldset = document.getElementById("genitief-vnw-fieldset");
+const heeftGenitiefVnw = volgende === "persoonlijke-voornaamwoorden.html";
+genitiefVnwFieldset.hidden = !heeftGenitiefVnw;
+if (heeftGenitiefVnw) {
+  const huidigeGenitiefVnw = haalToonGenitiefVnwOp() ? "aan" : "uit";
+  document.querySelector(`input[name="genitief-vnw"][value="${huidigeGenitiefVnw}"]`).checked = true;
+}
+
 const tijdSlider = document.getElementById("tijd-slider");
 const tijdWaardeGetal = document.getElementById("tijd-waarde-getal");
 const tijdWaarschuwing = document.getElementById("tijd-waarschuwing");
@@ -79,6 +87,10 @@ document.getElementById("instellingen-form").addEventListener("submit", (e) => {
     zetArchaischDu(document.querySelector('input[name="archaisch-du"]').checked);
     zetArchaischGijlieden(document.querySelector('input[name="archaisch-gijlieden"]').checked);
     zetArchaischWijlieden(document.querySelector('input[name="archaisch-wijlieden"]').checked);
+  }
+  if (heeftGenitiefVnw) {
+    const genitiefTonen = document.querySelector('input[name="genitief-vnw"]:checked').value === "aan";
+    zetToonGenitiefVnw(genitiefTonen);
   }
   window.location.href = volgende;
 });

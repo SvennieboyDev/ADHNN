@@ -42,10 +42,72 @@ function stamVorm(woordObj) {
 }
 
 function obliekeVorm(woordObj) {
-  // Datief/accusatief-vorm van het zelfstandig naamwoord zelf (los van het
-  // lidwoord). "zwakke_genitief" beïnvloedt uitsluitend de genitief-uitgang;
-  // datief en accusatief enkelvoud blijven altijd de kale stam.
+  // Accusatief-vorm van het zelfstandig naamwoord zelf (los van het
+  // lidwoord): blijft altijd de kale stam.
   return woordObj.woord;
+}
+
+// Correcte -e vorm voor de woorden waarbij het woordenbestand ("datief_e")
+// aangeeft dat de volle historische datief op -e natuurlijk is. Net als bij
+// ZWAKKE_VORMEN en BIJV_ZWAK_VORMEN_ENKEL is dit met de hand afgeleid met
+// de gewone Nederlandse spellingregels: klinkerverdubbeling die wegvalt in
+// een open lettergreep ("zoon" -> "zone", net als het meervoud "zonen"),
+// s/f die stemhebbend worden ("huis" -> "huize", "brief" -> "brieve") en
+// waar nodig medeklinkerverdubbeling ("man" -> "manne").
+const DATIEF_E_VORMEN = {
+  man: "manne",
+  zoon: "zone",
+  broer: "broere",
+  heer: "here",
+  graaf: "grave",
+  vorst: "vorste",
+  prins: "prinse",
+  held: "helde",
+  boer: "boere",
+  mens: "mense",
+  knaap: "knape",
+  dag: "dage",
+  tijd: "tijde",
+  nacht: "nachte",
+  berg: "berge",
+  steen: "stene",
+  boom: "bome",
+  weg: "wege",
+  troon: "trone",
+  brief: "brieve",
+  muur: "mure",
+  stoel: "stoele",
+  arm: "arme",
+  voet: "voete",
+  huis: "huize",
+  land: "lande",
+  rijk: "rijke",
+  dorp: "dorpe",
+  volk: "volke",
+  kind: "kinde",
+  hart: "harte",
+  hoofd: "hoofde",
+  woord: "woorde",
+  geld: "gelde",
+  goud: "goude",
+  brood: "brode",
+  licht: "lichte",
+  vuur: "vure",
+  bloed: "bloede",
+  boek: "boeke",
+  veld: "velde",
+};
+
+// Sommige mannelijke/onzijdige woorden kregen in de datief enkelvoud van
+// nature ook een extra -e ("den goeden gelde"), andere bleven kaal ("den
+// goeden man"); vrouwelijke woorden krijgen sowieso geen uitgang. Het veld
+// "datief_e" in het woordenbestand geeft dit per woord aan. Is de -e
+// natuurlijk, dan worden beide vormen (mét en zonder -e) goedgerekend.
+function datiefVormen(woordObj) {
+  if (woordObj.geslacht !== "v" && woordObj.datief_e) {
+    return [DATIEF_E_VORMEN[woordObj.woord] || `${woordObj.woord}e`, woordObj.woord];
+  }
+  return [woordObj.woord];
 }
 
 function genitiefVorm(woordObj) {
@@ -73,7 +135,7 @@ function vormen(woordObj) {
   return {
     nominatief: `${artikelen.nominatief} ${stamVorm(woordObj)}`,
     genitief: `${artikelen.genitief} ${gen}`,
-    datief: `${artikelen.datief} ${oblique}`,
+    datief: datiefVormen(woordObj).map((v) => `${artikelen.datief} ${v}`),
     accusatief: `${artikelen.accusatief} ${oblique}`,
   };
 }
@@ -100,7 +162,7 @@ function vormenOnbepaald(woordObj) {
   return {
     nominatief: `${artikelen.nominatief} ${stamVorm(woordObj)}`,
     genitief: `${artikelen.genitief} ${gen}`,
-    datief: `${artikelen.datief} ${oblique}`,
+    datief: datiefVormen(woordObj).map((v) => `${artikelen.datief} ${v}`),
     accusatief: `${artikelen.accusatief} ${oblique}`,
   };
 }
@@ -181,11 +243,21 @@ function kiesBijvoeglijkNaamwoord(woordObj) {
 }
 
 // Het zelfstandig naamwoord zelf verbuigt exact zoals bij het bepaalde
-// lidwoord (zwakke/sterke genitief enz.).
+// lidwoord (zwakke/sterke genitief enz.). Geeft de primaire (weer te geven)
+// vorm terug — bij de datief dus de vorm mét -e als die natuurlijk is.
 function naamwoordVormVoorZin(woordObj, geval) {
   if (geval === "nominatief") return stamVorm(woordObj);
   if (geval === "genitief") return genitiefVorm(woordObj);
+  if (geval === "datief") return datiefVormen(woordObj)[0];
   return obliekeVorm(woordObj);
+}
+
+// Zelfde als hierboven, maar geeft alle geaccepteerde varianten terug (voor
+// de exacte match in zin-modus, waar zowel mét als zonder -e goed moet
+// worden gerekend).
+function naamwoordVormenVoorZin(woordObj, geval) {
+  if (geval === "datief") return datiefVormen(woordObj);
+  return [naamwoordVormVoorZin(woordObj, geval)];
 }
 
 function vormenBijvZwak(woordObj) {
@@ -236,7 +308,7 @@ function volledigeZinConfigBijvZwak(woordObj, geval) {
   const modernDet = ARTIKELEN[g].nominatief; // modern lidwoord verbuigt niet
   const modernAdj = BIJV_ZWAK_VORMEN_ENKEL[kiesBijvoeglijkNaamwoord(woordObj)].e; // modern: altijd enkele klinker, altijd -e
   const modernNoun = woordObj.woord;
-  const noun = naamwoordVormVoorZin(woordObj, geval);
+  const noun = naamwoordVormenVoorZin(woordObj, geval);
 
   function bouw(modernPrefix, prefix, extraVast) {
     const suffixDelen = [
@@ -334,7 +406,7 @@ function volledigeZinConfigBijvSterk(woordObj, geval) {
   const adjectief = kiesBijvoeglijkNaamwoord(woordObj);
   const modernAdj = g === "o" ? adjectief : BIJV_ZWAK_VORMEN_ENKEL[adjectief].e;
   const modernNoun = woordObj.woord;
-  const noun = naamwoordVormVoorZin(woordObj, geval);
+  const noun = naamwoordVormenVoorZin(woordObj, geval);
 
   function bouw(modernPrefix, prefix, extraVast) {
     const suffixDelen = [
@@ -418,7 +490,7 @@ function volledigeZinConfigBijvGemengd(woordObj, geval) {
   // bij een de-woord; bij een het-woord blijft het onverbogen ("een oud gevoel").
   const modernAdj = g === "o" ? adjectief : BIJV_ZWAK_VORMEN_ENKEL[adjectief].e;
   const modernNoun = woordObj.woord;
-  const noun = naamwoordVormVoorZin(woordObj, geval);
+  const noun = naamwoordVormenVoorZin(woordObj, geval);
 
   function bouw(modernPrefix, prefix, extraVast) {
     const suffixDelen = [
@@ -686,6 +758,17 @@ function haalArchaischWijliedenOp() {
 }
 function zetArchaischWijlieden(aan) {
   localStorage.setItem(INSTELLING_ARCHAISCH_WIJLIEDEN_KEY, aan ? "aan" : "uit");
+}
+
+// De genitief van persoonlijke voornaamwoorden komt in natuurlijk Nederlands
+// nog maar zelden voor, dus is die standaard uitgeschakeld.
+const INSTELLING_GENITIEF_VNW_KEY = "adhnn_genitief_voornaamwoorden";
+
+function haalToonGenitiefVnwOp() {
+  return localStorage.getItem(INSTELLING_GENITIEF_VNW_KEY) === "aan";
+}
+function zetToonGenitiefVnw(aan) {
+  localStorage.setItem(INSTELLING_GENITIEF_VNW_KEY, aan ? "aan" : "uit");
 }
 
 const INSTELLING_TIJD_KEY = "adhnn_tijdslimiet_minuten";
