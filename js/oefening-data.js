@@ -42,10 +42,84 @@ function stamVorm(woordObj) {
 }
 
 function obliekeVorm(woordObj) {
-  // Datief/accusatief-vorm van het zelfstandig naamwoord zelf (los van het
-  // lidwoord). "zwakke_genitief" beïnvloedt uitsluitend de genitief-uitgang;
-  // datief en accusatief enkelvoud blijven altijd de kale stam.
+  // Accusatief-vorm van het zelfstandig naamwoord zelf (los van het
+  // lidwoord): blijft altijd de kale stam.
   return woordObj.woord;
+}
+
+// Correcte -e vorm voor de woorden waarbij het woordenbestand ("datief_e")
+// aangeeft dat de volle historische datief op -e natuurlijk is. Net als bij
+// ZWAKKE_VORMEN en BIJV_ZWAK_VORMEN_ENKEL is dit met de hand afgeleid met
+// de gewone Nederlandse spellingregels: klinkerverdubbeling die wegvalt in
+// een open lettergreep ("zoon" -> "zone", net als het meervoud "zonen"),
+// s/f die stemhebbend worden ("huis" -> "huize", "brief" -> "brieve") en
+// waar nodig medeklinkerverdubbeling ("man" -> "manne").
+const DATIEF_E_VORMEN = {
+  man: "manne",
+  zoon: "zone",
+  broer: "broere",
+  heer: "here",
+  graaf: "grave",
+  vorst: "vorste",
+  prins: "prinse",
+  held: "helde",
+  boer: "boere",
+  mens: "mense",
+  knaap: "knape",
+  dag: "dage",
+  tijd: "tijde",
+  nacht: "nachte",
+  berg: "berge",
+  steen: "stene",
+  boom: "bome",
+  weg: "wege",
+  troon: "trone",
+  brief: "brieve",
+  muur: "mure",
+  stoel: "stoele",
+  arm: "arme",
+  voet: "voete",
+  huis: "huize",
+  land: "lande",
+  rijk: "rijke",
+  dorp: "dorpe",
+  volk: "volke",
+  kind: "kinde",
+  hart: "harte",
+  hoofd: "hoofde",
+  woord: "woorde",
+  geld: "gelde",
+  goud: "goude",
+  brood: "brode",
+  licht: "lichte",
+  vuur: "vure",
+  bloed: "bloede",
+  boek: "boeke",
+  veld: "velde",
+};
+
+// Sommige mannelijke/onzijdige woorden kregen in de datief enkelvoud van
+// nature ook een extra -e ("den goeden gelde"), andere bleven kaal ("den
+// goeden man"); vrouwelijke woorden krijgen sowieso geen uitgang. Het veld
+// "datief_e" in het woordenbestand geeft dit per woord aan. Welke vorm er
+// daadwerkelijk gebruikt wordt, hangt af van de "datief-vervoeging"-
+// instelling: alleen bij "historisch" wordt de -e daadwerkelijk gebruikt.
+function datiefVorm(woordObj) {
+  if (woordObj.geslacht !== "v" && woordObj.datief_e && haalDatiefVormOp() === "historisch") {
+    return DATIEF_E_VORMEN[woordObj.woord] || `${woordObj.woord}e`;
+  }
+  return woordObj.woord;
+}
+
+// Bij de instelling "modern" gebruiken onzijdige woorden in de datief het
+// lidwoord "het" (onverbogen) i.p.v. het gebruikelijke "den". Voor andere
+// geslachten en de andere instellingen blijft het standaard datief-lidwoord
+// gewoon staan.
+function datiefArtikel(artikelen, geslacht) {
+  if (geslacht === "o" && haalDatiefVormOp() === "modern") {
+    return "het";
+  }
+  return artikelen.datief;
 }
 
 function genitiefVorm(woordObj) {
@@ -73,7 +147,7 @@ function vormen(woordObj) {
   return {
     nominatief: `${artikelen.nominatief} ${stamVorm(woordObj)}`,
     genitief: `${artikelen.genitief} ${gen}`,
-    datief: `${artikelen.datief} ${oblique}`,
+    datief: `${datiefArtikel(artikelen, g)} ${datiefVorm(woordObj)}`,
     accusatief: `${artikelen.accusatief} ${oblique}`,
   };
 }
@@ -100,7 +174,9 @@ function vormenOnbepaald(woordObj) {
   return {
     nominatief: `${artikelen.nominatief} ${stamVorm(woordObj)}`,
     genitief: `${artikelen.genitief} ${gen}`,
-    datief: `${artikelen.datief} ${oblique}`,
+    // Geen "modern het"-alternatief bij het onbepaald lidwoord: "een" kent
+    // (in tegenstelling tot "de/het") geen den/het-onderscheid om te ruilen.
+    datief: `${artikelen.datief} ${datiefVorm(woordObj)}`,
     accusatief: `${artikelen.accusatief} ${oblique}`,
   };
 }
@@ -185,6 +261,7 @@ function kiesBijvoeglijkNaamwoord(woordObj) {
 function naamwoordVormVoorZin(woordObj, geval) {
   if (geval === "nominatief") return stamVorm(woordObj);
   if (geval === "genitief") return genitiefVorm(woordObj);
+  if (geval === "datief") return datiefVorm(woordObj);
   return obliekeVorm(woordObj);
 }
 
@@ -196,10 +273,11 @@ function vormenBijvZwak(woordObj) {
   CASES.forEach((geval) => {
     resultaat[geval] = `${det[geval]} ${bijvNaamwoordVorm(adjectief, g, geval)}`;
   });
-  // Bij de datief onzijdig werd ook al de onverbogen vorm ("het goede")
-  // gebruikt naast de volledig verbogen vorm ("den goeden").
-  if (g === "o") {
-    resultaat.datief = [resultaat.datief, `het ${bijvNaamwoordVorm(adjectief, g, "nominatief")}`];
+  // Bij de instelling "modern" gebruiken onzijdige woorden in de datief
+  // "het" met het onverbogen bijvoeglijk naamwoord ("het goede") i.p.v. het
+  // gebruikelijke "den goeden".
+  if (g === "o" && haalDatiefVormOp() === "modern") {
+    resultaat.datief = `het ${bijvNaamwoordVorm(adjectief, g, "nominatief")}`;
   }
   return resultaat;
 }
@@ -660,6 +738,25 @@ function geslachtSuffix(geslacht) {
   return haalToonGeslachtOp() ? ` (${geslacht})` : "";
 }
 
+// Bepaalt hoe de datief van het zelfstandig naamwoord zelf gevormd wordt:
+// "tabel" = vervoegen volgens de regels, zonder extra -e ook al zou dat
+// historisch gekund hebben; "historisch" = met de extra -e waar het
+// woordenbestand (datief_e) aangeeft dat die natuurlijk is; "modern" = bij
+// onzijdige woorden de alternatieve vorm met "het" i.p.v. "den" (en het
+// bijvoeglijk naamwoord onverbogen). Geldt voor elke oefening met een
+// zelfstandig naamwoord (lidwoorden + alle bijvoeglijk-naamwoord-
+// categorieën). Standaard "tabel" (vervoegen volgens de regels).
+const INSTELLING_DATIEF_VORM_KEY = "adhnn_datief_vorm";
+
+function haalDatiefVormOp() {
+  const waarde = localStorage.getItem(INSTELLING_DATIEF_VORM_KEY);
+  return waarde === "historisch" || waarde === "modern" ? waarde : "tabel";
+}
+
+function zetDatiefVorm(waarde) {
+  localStorage.setItem(INSTELLING_DATIEF_VORM_KEY, waarde);
+}
+
 // Drie onafhankelijke instellingen om archaïsche/dialectische vormen wel of
 // niet mee te nemen bij de persoonlijke voornaamwoorden. Allemaal standaard
 // uit.
@@ -686,6 +783,17 @@ function haalArchaischWijliedenOp() {
 }
 function zetArchaischWijlieden(aan) {
   localStorage.setItem(INSTELLING_ARCHAISCH_WIJLIEDEN_KEY, aan ? "aan" : "uit");
+}
+
+// De genitief van persoonlijke voornaamwoorden komt in natuurlijk Nederlands
+// nog maar zelden voor, dus is die standaard uitgeschakeld.
+const INSTELLING_GENITIEF_VNW_KEY = "adhnn_genitief_voornaamwoorden";
+
+function haalToonGenitiefVnwOp() {
+  return localStorage.getItem(INSTELLING_GENITIEF_VNW_KEY) === "aan";
+}
+function zetToonGenitiefVnw(aan) {
+  localStorage.setItem(INSTELLING_GENITIEF_VNW_KEY, aan ? "aan" : "uit");
 }
 
 const INSTELLING_TIJD_KEY = "adhnn_tijdslimiet_minuten";

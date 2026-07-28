@@ -15,6 +15,15 @@ if (heeftGeslacht) {
   document.querySelector(`input[name="geslacht"][value="${huidigeGeslacht}"]`).checked = true;
 }
 
+// Geldt voor precies dezelfde categorieën als de geslachtsinstelling: elke
+// oefening met een zelfstandig naamwoord.
+const datiefVormFieldset = document.getElementById("datief-vorm-fieldset");
+datiefVormFieldset.hidden = !heeftGeslacht;
+if (heeftGeslacht) {
+  const huidigeDatiefVorm = haalDatiefVormOp();
+  document.querySelector(`input[name="datief-vorm"][value="${huidigeDatiefVorm}"]`).checked = true;
+}
+
 const klinkerFieldset = document.getElementById("klinker-fieldset");
 const heeftBijvoeglijkeNaamwoorden = volgende.startsWith("bijvoeglijk-naamwoord");
 klinkerFieldset.hidden = !heeftBijvoeglijkeNaamwoorden;
@@ -30,6 +39,14 @@ if (heeftArchaischeVormen) {
   document.querySelector('input[name="archaisch-du"]').checked = haalArchaischDuOp();
   document.querySelector('input[name="archaisch-gijlieden"]').checked = haalArchaischGijliedenOp();
   document.querySelector('input[name="archaisch-wijlieden"]').checked = haalArchaischWijliedenOp();
+}
+
+const genitiefVnwFieldset = document.getElementById("genitief-vnw-fieldset");
+const heeftGenitiefVnw = volgende === "persoonlijke-voornaamwoorden.html";
+genitiefVnwFieldset.hidden = !heeftGenitiefVnw;
+if (heeftGenitiefVnw) {
+  const huidigeGenitiefVnw = haalToonGenitiefVnwOp() ? "aan" : "uit";
+  document.querySelector(`input[name="genitief-vnw"][value="${huidigeGenitiefVnw}"]`).checked = true;
 }
 
 const tijdSlider = document.getElementById("tijd-slider");
@@ -70,6 +87,8 @@ document.getElementById("instellingen-form").addEventListener("submit", (e) => {
   if (heeftGeslacht) {
     const geslachtTonen = document.querySelector('input[name="geslacht"]:checked').value === "aan";
     zetToonGeslacht(geslachtTonen);
+    const datiefVorm = document.querySelector('input[name="datief-vorm"]:checked').value;
+    zetDatiefVorm(datiefVorm);
   }
   if (heeftBijvoeglijkeNaamwoorden) {
     const klinker = document.querySelector('input[name="klinker"]:checked').value;
@@ -79,6 +98,10 @@ document.getElementById("instellingen-form").addEventListener("submit", (e) => {
     zetArchaischDu(document.querySelector('input[name="archaisch-du"]').checked);
     zetArchaischGijlieden(document.querySelector('input[name="archaisch-gijlieden"]').checked);
     zetArchaischWijlieden(document.querySelector('input[name="archaisch-wijlieden"]').checked);
+  }
+  if (heeftGenitiefVnw) {
+    const genitiefTonen = document.querySelector('input[name="genitief-vnw"]:checked').value === "aan";
+    zetToonGenitiefVnw(genitiefTonen);
   }
   window.location.href = volgende;
 });

@@ -85,7 +85,9 @@ function segmentenVan(delen, tekst) {
 
 // Beoordeelt één kandidaat-antwoord voor een volledig overgetypte zin: het
 // naamval-gedeelte (kritiek) moet exact kloppen, kleine typefouten in de
-// rest van de zin mogen.
+// rest van de zin mogen. Een segment mag zelf ook meerdere geldige woorden
+// hebben (bv. een zelfstandig naamwoord dat met én zonder -e goed is) —
+// dat wordt aangeleverd als een array in plaats van een string.
 function beoordeelZinKandidaat(waarde, config, kritiekVorm) {
   const segmenten = [
     ...segmentenVan(config.prefixDelen, config.prefix),
@@ -98,14 +100,14 @@ function beoordeelZinKandidaat(waarde, config, kritiekVorm) {
   }
   let typoGevonden = false;
   for (let i = 0; i < segmenten.length; i++) {
-    const verwachtWoord = segmenten[i].tekst.toLowerCase();
+    const opties = alsLijst(segmenten[i].tekst).map((t) => t.toLowerCase());
     const actueelWoord = actueleWoorden[i];
-    if (verwachtWoord === actueelWoord) continue;
+    if (opties.includes(actueelWoord)) continue;
     if (segmenten[i].kritiek) {
       return { juist: false, typo: false };
     }
-    const afstand = bewerkingsafstand(verwachtWoord, actueelWoord);
-    if (afstand <= toegestaneTypoAfstand(verwachtWoord)) {
+    const kleinsteAfstand = Math.min(...opties.map((optie) => bewerkingsafstand(optie, actueelWoord)));
+    if (kleinsteAfstand <= toegestaneTypoAfstand(opties[0])) {
       typoGevonden = true;
       continue;
     }
@@ -137,8 +139,63 @@ function volledigeZinTekst(config, kritiekVormen) {
     { tekst: middenTekst },
     ...segmentenVan(config.suffixDelen, config.suffix),
   ];
-  const tekst = segmenten.map((s) => s.tekst).join(" ");
+  const tekst = segmenten.map((s) => alsLijst(s.tekst).join(" / ")).join(" ");
   return tekst.charAt(0).toUpperCase() + tekst.slice(1);
+}
+
+// De oefenkaart heeft een vaste standaardbreedte (zie .woordkaart in
+// style.css), zodat alle categorieën er hetzelfde uitzien. Past de tekst in
+// een zin daar niet binnen twee regels in, dan wordt de kaart stapsgewijs
+// breder gemaakt tot het wél past, in plaats van de zin lelijk over veel
+// regels te laten breken. Nooit breder dan het scherm toelaat.
+const KAART_STANDAARDBREEDTE_REM = 36;
+const KAART_MAXBREEDTE_REM = 60;
+const KAART_BREEDTESTAP_REM = 4;
+const KAART_MAX_REGELS = 2;
+
+function telTekstregels(el) {
+  const bereik = document.createRange();
+  bereik.selectNodeContents(el);
+  return bereik.getClientRects().length;
+}
+
+function telFlexRijen(el) {
+  const tops = new Set();
+  Array.from(el.children).forEach((kind) => tops.add(Math.round(kind.offsetTop)));
+  return tops.size;
+}
+
+function kaartHeeftTeVeelRegels(kaart) {
+  const tekstBlokken = kaart.querySelectorAll(".moderne-zin");
+  for (const el of tekstBlokken) {
+    if (telTekstregels(el) > KAART_MAX_REGELS) return true;
+  }
+  const zinRijen = kaart.querySelectorAll(".zin");
+  for (const el of zinRijen) {
+    if (telFlexRijen(el) > KAART_MAX_REGELS) return true;
+  }
+  return false;
+}
+
+// Meet de daadwerkelijk gerenderde kaart en verbreedt die pas als het echt
+// nodig is (in plaats van vooraf te gokken op basis van tekstlengte). De
+// header/titel erboven schalen mee, zodat de hele pagina in de pas blijft
+// lopen met de kaart in plaats van er smaller naast te staan.
+function pasKaartBreedteAan(kaart) {
+  function zetBreedte(breedte) {
+    const waarde = `min(94vw, ${breedte}rem)`;
+    kaart.style.maxWidth = waarde;
+    document.querySelectorAll(".oefen-header, .categorie-titel").forEach((el) => {
+      el.style.maxWidth = waarde;
+    });
+  }
+
+  let breedte = KAART_STANDAARDBREEDTE_REM;
+  zetBreedte(breedte);
+  while (breedte < KAART_MAXBREEDTE_REM && kaartHeeftTeVeelRegels(kaart)) {
+    breedte += KAART_BREEDTESTAP_REM;
+    zetBreedte(breedte);
+  }
 }
 
 function startOefening({
@@ -150,9 +207,11 @@ function startOefening({
   ondertitelFn = () => null,
   woordenFilterFn = null,
   woordenBronFn = laadWoorden,
+  casesFn = () => CASES,
 }) {
   let woorden = [];
   let modus = "deel";
+  let cases = CASES;
   let idx = 0;
   let score = { correct: 0, total: 0 };
   let attempted = {};
@@ -273,7 +332,7 @@ function startOefening({
 
     function naVoltooiing() {
       checkVolledig();
-      const volgendeGeval = CASES.find((c) => !correctDone[c] && !opgegeven[c]);
+      const volgendeGeval = cases.find((c) => !correctDone[c] && !opgegeven[c]);
       if (volgendeGeval) {
         inputsByCase[volgendeGeval].focus();
       } else if (!volgendeBtn.hidden) {
@@ -339,7 +398,7 @@ function startOefening({
       };
     }
 
-    CASES.forEach((geval) => {
+    cases.forEach((geval) => {
       const verwacht = antwoorden[geval];
 
       const rij = document.createElement("div");
@@ -450,12 +509,13 @@ function startOefening({
 
     content.innerHTML = "";
     content.appendChild(kaart);
+    pasKaartBreedteAan(kaart);
 
     const eersteInput = kaart.querySelector(".antwoord-input, .zin-input");
     if (eersteInput) eersteInput.focus();
 
     function checkVolledig() {
-      if (CASES.every((c) => correctDone[c] || opgegeven[c])) {
+      if (cases.every((c) => correctDone[c] || opgegeven[c])) {
         volgendeBtn.hidden = false;
         enterHandler = (e) => {
           if (e.key === "Enter") {
@@ -470,6 +530,7 @@ function startOefening({
   woordenBronFn()
     .then((data) => {
       modus = haalModusOp();
+      cases = casesFn();
       const gefilterd = woordenFilterFn ? data.filter(woordenFilterFn) : data;
       woorden = schudArray(gefilterd);
       updateScore();

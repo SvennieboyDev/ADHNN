@@ -401,6 +401,13 @@ h1 {
   margin-top: 0.5rem;
 }
 
+.instelling-waarschuwing {
+  display: block;
+  color: #b8453a;
+  font-size: 0.85rem;
+  margin-top: 0.3rem;
+}
+
 .oefen-header .tijd {
   font-size: 1.1rem;
   font-weight: bold;
