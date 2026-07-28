@@ -15,6 +15,15 @@ if (heeftGeslacht) {
   document.querySelector(`input[name="geslacht"][value="${huidigeGeslacht}"]`).checked = true;
 }
 
+// Geldt voor precies dezelfde categorieën als de geslachtsinstelling: elke
+// oefening met een zelfstandig naamwoord.
+const datiefVormFieldset = document.getElementById("datief-vorm-fieldset");
+datiefVormFieldset.hidden = !heeftGeslacht;
+if (heeftGeslacht) {
+  const huidigeDatiefVorm = haalDatiefVormOp();
+  document.querySelector(`input[name="datief-vorm"][value="${huidigeDatiefVorm}"]`).checked = true;
+}
+
 const klinkerFieldset = document.getElementById("klinker-fieldset");
 const heeftBijvoeglijkeNaamwoorden = volgende.startsWith("bijvoeglijk-naamwoord");
 klinkerFieldset.hidden = !heeftBijvoeglijkeNaamwoorden;
@@ -78,6 +87,8 @@ document.getElementById("instellingen-form").addEventListener("submit", (e) => {
   if (heeftGeslacht) {
     const geslachtTonen = document.querySelector('input[name="geslacht"]:checked').value === "aan";
     zetToonGeslacht(geslachtTonen);
+    const datiefVorm = document.querySelector('input[name="datief-vorm"]:checked').value;
+    zetDatiefVorm(datiefVorm);
   }
   if (heeftBijvoeglijkeNaamwoorden) {
     const klinker = document.querySelector('input[name="klinker"]:checked').value;

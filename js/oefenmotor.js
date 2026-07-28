@@ -178,13 +178,23 @@ function kaartHeeftTeVeelRegels(kaart) {
 }
 
 // Meet de daadwerkelijk gerenderde kaart en verbreedt die pas als het echt
-// nodig is (in plaats van vooraf te gokken op basis van tekstlengte).
+// nodig is (in plaats van vooraf te gokken op basis van tekstlengte). De
+// header/titel erboven schalen mee, zodat de hele pagina in de pas blijft
+// lopen met de kaart in plaats van er smaller naast te staan.
 function pasKaartBreedteAan(kaart) {
+  function zetBreedte(breedte) {
+    const waarde = `min(94vw, ${breedte}rem)`;
+    kaart.style.maxWidth = waarde;
+    document.querySelectorAll(".oefen-header, .categorie-titel").forEach((el) => {
+      el.style.maxWidth = waarde;
+    });
+  }
+
   let breedte = KAART_STANDAARDBREEDTE_REM;
-  kaart.style.maxWidth = `min(94vw, ${breedte}rem)`;
+  zetBreedte(breedte);
   while (breedte < KAART_MAXBREEDTE_REM && kaartHeeftTeVeelRegels(kaart)) {
     breedte += KAART_BREEDTESTAP_REM;
-    kaart.style.maxWidth = `min(94vw, ${breedte}rem)`;
+    zetBreedte(breedte);
   }
 }
 

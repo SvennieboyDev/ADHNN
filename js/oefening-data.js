@@ -101,13 +101,25 @@ const DATIEF_E_VORMEN = {
 // Sommige mannelijke/onzijdige woorden kregen in de datief enkelvoud van
 // nature ook een extra -e ("den goeden gelde"), andere bleven kaal ("den
 // goeden man"); vrouwelijke woorden krijgen sowieso geen uitgang. Het veld
-// "datief_e" in het woordenbestand geeft dit per woord aan. Is de -e
-// natuurlijk, dan worden beide vormen (mét en zonder -e) goedgerekend.
-function datiefVormen(woordObj) {
-  if (woordObj.geslacht !== "v" && woordObj.datief_e) {
-    return [DATIEF_E_VORMEN[woordObj.woord] || `${woordObj.woord}e`, woordObj.woord];
+// "datief_e" in het woordenbestand geeft dit per woord aan. Welke vorm er
+// daadwerkelijk gebruikt wordt, hangt af van de "datief-vervoeging"-
+// instelling: alleen bij "historisch" wordt de -e daadwerkelijk gebruikt.
+function datiefVorm(woordObj) {
+  if (woordObj.geslacht !== "v" && woordObj.datief_e && haalDatiefVormOp() === "historisch") {
+    return DATIEF_E_VORMEN[woordObj.woord] || `${woordObj.woord}e`;
   }
-  return [woordObj.woord];
+  return woordObj.woord;
+}
+
+// Bij de instelling "modern" gebruiken onzijdige woorden in de datief het
+// lidwoord "het" (onverbogen) i.p.v. het gebruikelijke "den". Voor andere
+// geslachten en de andere instellingen blijft het standaard datief-lidwoord
+// gewoon staan.
+function datiefArtikel(artikelen, geslacht) {
+  if (geslacht === "o" && haalDatiefVormOp() === "modern") {
+    return "het";
+  }
+  return artikelen.datief;
 }
 
 function genitiefVorm(woordObj) {
@@ -135,7 +147,7 @@ function vormen(woordObj) {
   return {
     nominatief: `${artikelen.nominatief} ${stamVorm(woordObj)}`,
     genitief: `${artikelen.genitief} ${gen}`,
-    datief: datiefVormen(woordObj).map((v) => `${artikelen.datief} ${v}`),
+    datief: `${datiefArtikel(artikelen, g)} ${datiefVorm(woordObj)}`,
     accusatief: `${artikelen.accusatief} ${oblique}`,
   };
 }
@@ -162,7 +174,9 @@ function vormenOnbepaald(woordObj) {
   return {
     nominatief: `${artikelen.nominatief} ${stamVorm(woordObj)}`,
     genitief: `${artikelen.genitief} ${gen}`,
-    datief: datiefVormen(woordObj).map((v) => `${artikelen.datief} ${v}`),
+    // Geen "modern het"-alternatief bij het onbepaald lidwoord: "een" kent
+    // (in tegenstelling tot "de/het") geen den/het-onderscheid om te ruilen.
+    datief: `${artikelen.datief} ${datiefVorm(woordObj)}`,
     accusatief: `${artikelen.accusatief} ${oblique}`,
   };
 }
@@ -243,21 +257,12 @@ function kiesBijvoeglijkNaamwoord(woordObj) {
 }
 
 // Het zelfstandig naamwoord zelf verbuigt exact zoals bij het bepaalde
-// lidwoord (zwakke/sterke genitief enz.). Geeft de primaire (weer te geven)
-// vorm terug — bij de datief dus de vorm mét -e als die natuurlijk is.
+// lidwoord (zwakke/sterke genitief enz.).
 function naamwoordVormVoorZin(woordObj, geval) {
   if (geval === "nominatief") return stamVorm(woordObj);
   if (geval === "genitief") return genitiefVorm(woordObj);
-  if (geval === "datief") return datiefVormen(woordObj)[0];
+  if (geval === "datief") return datiefVorm(woordObj);
   return obliekeVorm(woordObj);
-}
-
-// Zelfde als hierboven, maar geeft alle geaccepteerde varianten terug (voor
-// de exacte match in zin-modus, waar zowel mét als zonder -e goed moet
-// worden gerekend).
-function naamwoordVormenVoorZin(woordObj, geval) {
-  if (geval === "datief") return datiefVormen(woordObj);
-  return [naamwoordVormVoorZin(woordObj, geval)];
 }
 
 function vormenBijvZwak(woordObj) {
@@ -268,10 +273,11 @@ function vormenBijvZwak(woordObj) {
   CASES.forEach((geval) => {
     resultaat[geval] = `${det[geval]} ${bijvNaamwoordVorm(adjectief, g, geval)}`;
   });
-  // Bij de datief onzijdig werd ook al de onverbogen vorm ("het goede")
-  // gebruikt naast de volledig verbogen vorm ("den goeden").
-  if (g === "o") {
-    resultaat.datief = [resultaat.datief, `het ${bijvNaamwoordVorm(adjectief, g, "nominatief")}`];
+  // Bij de instelling "modern" gebruiken onzijdige woorden in de datief
+  // "het" met het onverbogen bijvoeglijk naamwoord ("het goede") i.p.v. het
+  // gebruikelijke "den goeden".
+  if (g === "o" && haalDatiefVormOp() === "modern") {
+    resultaat.datief = `het ${bijvNaamwoordVorm(adjectief, g, "nominatief")}`;
   }
   return resultaat;
 }
@@ -308,7 +314,7 @@ function volledigeZinConfigBijvZwak(woordObj, geval) {
   const modernDet = ARTIKELEN[g].nominatief; // modern lidwoord verbuigt niet
   const modernAdj = BIJV_ZWAK_VORMEN_ENKEL[kiesBijvoeglijkNaamwoord(woordObj)].e; // modern: altijd enkele klinker, altijd -e
   const modernNoun = woordObj.woord;
-  const noun = naamwoordVormenVoorZin(woordObj, geval);
+  const noun = naamwoordVormVoorZin(woordObj, geval);
 
   function bouw(modernPrefix, prefix, extraVast) {
     const suffixDelen = [
@@ -406,7 +412,7 @@ function volledigeZinConfigBijvSterk(woordObj, geval) {
   const adjectief = kiesBijvoeglijkNaamwoord(woordObj);
   const modernAdj = g === "o" ? adjectief : BIJV_ZWAK_VORMEN_ENKEL[adjectief].e;
   const modernNoun = woordObj.woord;
-  const noun = naamwoordVormenVoorZin(woordObj, geval);
+  const noun = naamwoordVormVoorZin(woordObj, geval);
 
   function bouw(modernPrefix, prefix, extraVast) {
     const suffixDelen = [
@@ -490,7 +496,7 @@ function volledigeZinConfigBijvGemengd(woordObj, geval) {
   // bij een de-woord; bij een het-woord blijft het onverbogen ("een oud gevoel").
   const modernAdj = g === "o" ? adjectief : BIJV_ZWAK_VORMEN_ENKEL[adjectief].e;
   const modernNoun = woordObj.woord;
-  const noun = naamwoordVormenVoorZin(woordObj, geval);
+  const noun = naamwoordVormVoorZin(woordObj, geval);
 
   function bouw(modernPrefix, prefix, extraVast) {
     const suffixDelen = [
@@ -730,6 +736,25 @@ function zetToonGeslacht(tonen) {
 // werkt.
 function geslachtSuffix(geslacht) {
   return haalToonGeslachtOp() ? ` (${geslacht})` : "";
+}
+
+// Bepaalt hoe de datief van het zelfstandig naamwoord zelf gevormd wordt:
+// "tabel" = de gangbare vorm, zonder extra -e ook al zou dat historisch
+// gekund hebben; "historisch" = met de extra -e waar het woordenbestand
+// (datief_e) aangeeft dat die natuurlijk is; "modern" = bij onzijdige
+// woorden de alternatieve vorm met "het" i.p.v. "den" (en het bijvoeglijk
+// naamwoord onverbogen). Geldt voor elke oefening met een zelfstandig
+// naamwoord (lidwoorden + alle bijvoeglijk-naamwoord-categorieën).
+// Standaard de gangbare tabelvorm.
+const INSTELLING_DATIEF_VORM_KEY = "adhnn_datief_vorm";
+
+function haalDatiefVormOp() {
+  const waarde = localStorage.getItem(INSTELLING_DATIEF_VORM_KEY);
+  return waarde === "historisch" || waarde === "modern" ? waarde : "tabel";
+}
+
+function zetDatiefVorm(waarde) {
+  localStorage.setItem(INSTELLING_DATIEF_VORM_KEY, waarde);
 }
 
 // Drie onafhankelijke instellingen om archaïsche/dialectische vormen wel of
