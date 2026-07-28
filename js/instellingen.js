@@ -8,6 +8,7 @@ const geslachtFieldset = document.getElementById("geslacht-fieldset");
 const heeftGeslacht =
   volgende === "bepaald-lidwoord.html" ||
   volgende === "onbepaald-lidwoord.html" ||
+  volgende === "bezittelijke-voornaamwoorden.html" ||
   volgende.startsWith("bijvoeglijk-naamwoord");
 geslachtFieldset.hidden = !heeftGeslacht;
 if (heeftGeslacht) {
@@ -16,11 +17,23 @@ if (heeftGeslacht) {
 }
 
 // Geldt voor precies dezelfde categorieën als de geslachtsinstelling: elke
-// oefening met een zelfstandig naamwoord.
+// oefening met een zelfstandig naamwoord. De "modernere vorm met het"-optie
+// is alleen zinvol waar er ook echt een den/het-keuze bestaat (bepaald
+// lidwoord zelf en de zwakke verbuiging, die dat lidwoord ook gebruikt) —
+// bij onbepaald lidwoord, sterke/gemengde verbuiging en bezittelijke
+// voornaamwoorden bestaat dat den/het-onderscheid niet, dus daar wordt die
+// optie verborgen (en gedraagt hij zich, mocht hij toch nog opgeslagen
+// staan, identiek aan "vervoegen volgens de regels").
 const datiefVormFieldset = document.getElementById("datief-vorm-fieldset");
 datiefVormFieldset.hidden = !heeftGeslacht;
+const heeftModernDatiefVorm =
+  volgende === "bepaald-lidwoord.html" || volgende === "bijvoeglijk-naamwoord-zwak.html";
+document.getElementById("datief-vorm-modern-optie").hidden = !heeftModernDatiefVorm;
 if (heeftGeslacht) {
-  const huidigeDatiefVorm = haalDatiefVormOp();
+  let huidigeDatiefVorm = haalDatiefVormOp();
+  if (huidigeDatiefVorm === "modern" && !heeftModernDatiefVorm) {
+    huidigeDatiefVorm = "tabel";
+  }
   document.querySelector(`input[name="datief-vorm"][value="${huidigeDatiefVorm}"]`).checked = true;
 }
 
@@ -32,11 +45,23 @@ if (heeftBijvoeglijkeNaamwoorden) {
   document.querySelector(`input[name="klinker"][value="${huidigeKlinker}"]`).checked = true;
 }
 
+// "Du" i.p.v. "gij" is ook relevant bij bezittelijke voornaamwoorden
+// ("dijn" i.p.v. "uw"); "gijlieden"/"wijlieden" gelden vooralsnog alleen bij
+// de persoonlijke voornaamwoorden zelf, dus die twee opties worden verborgen
+// als ze niets doen — anders zou de instelling verwarrend lijken.
 const archaischFieldset = document.getElementById("archaisch-fieldset");
-const heeftArchaischeVormen = volgende === "persoonlijke-voornaamwoorden.html";
+const heeftDu =
+  volgende === "persoonlijke-voornaamwoorden.html" || volgende === "bezittelijke-voornaamwoorden.html";
+const heeftGijliedenWijlieden = volgende === "persoonlijke-voornaamwoorden.html";
+const heeftArchaischeVormen = heeftDu || heeftGijliedenWijlieden;
 archaischFieldset.hidden = !heeftArchaischeVormen;
-if (heeftArchaischeVormen) {
+document.getElementById("archaisch-du-optie").hidden = !heeftDu;
+document.getElementById("archaisch-gijlieden-optie").hidden = !heeftGijliedenWijlieden;
+document.getElementById("archaisch-wijlieden-optie").hidden = !heeftGijliedenWijlieden;
+if (heeftDu) {
   document.querySelector('input[name="archaisch-du"]').checked = haalArchaischDuOp();
+}
+if (heeftGijliedenWijlieden) {
   document.querySelector('input[name="archaisch-gijlieden"]').checked = haalArchaischGijliedenOp();
   document.querySelector('input[name="archaisch-wijlieden"]').checked = haalArchaischWijliedenOp();
 }
@@ -94,8 +119,10 @@ document.getElementById("instellingen-form").addEventListener("submit", (e) => {
     const klinker = document.querySelector('input[name="klinker"]:checked').value;
     zetKlinkerspelling(klinker);
   }
-  if (heeftArchaischeVormen) {
+  if (heeftDu) {
     zetArchaischDu(document.querySelector('input[name="archaisch-du"]').checked);
+  }
+  if (heeftGijliedenWijlieden) {
     zetArchaischGijlieden(document.querySelector('input[name="archaisch-gijlieden"]').checked);
     zetArchaischWijlieden(document.querySelector('input[name="archaisch-wijlieden"]').checked);
   }

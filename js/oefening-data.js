@@ -519,6 +519,153 @@ function volledigeZinConfigBijvGemengd(woordObj, geval) {
   if (geval === "accusatief") return bouw("Ik zie", "Ik zie", "");
 }
 
+// --- Bezittelijke voornaamwoorden ---
+// Een bezittelijk voornaamwoord vervangt het lidwoord helemaal (net als bij
+// de sterke verbuiging) en verbuigt zelf als bijvoeglijk naamwoord: dezelfde
+// uitgangen als de sterke verbuiging, op één punt na — mannelijk nominatief
+// blijft onverbogen ("mijn vader", niet "mijne vader").
+const BEZIT_UITGANGEN = {
+  nominatief: { m: "", v: "e", o: "" },
+  genitief: { m: "s", v: "er", o: "s" },
+  datief: { m: "en", v: "er", o: "en" },
+  accusatief: { m: "en", v: "e", o: "" },
+};
+
+// "ons" is zelf weer een uitzondering op die uitzondering: het heeft geen
+// onverbogen mannelijk nominatief ("onze broer", niet "ons broer") en volgt
+// dus gewoon de gangbare sterke-verbuigingsuitgang. Alleen bij onzijdig
+// enkelvoud blijft de kale vorm staan ("ons huis", "ons hart").
+const ONS_UITGANGEN = {
+  nominatief: { m: "e", v: "e", o: "" },
+  genitief: { m: "s", v: "er", o: "s" },
+  datief: { m: "en", v: "er", o: "en" },
+  accusatief: { m: "en", v: "e", o: "" },
+};
+
+// Elke vorm is met de hand afgeleid volgens dezelfde spellingregels als
+// elders in de app: "mijn"/"zijn"/"dijn" veranderen nooit (ij is een
+// tweeklank, geen klinker om te verdubbelen of te verkorten); "haar"
+// verliest de dubbele a in een open lettergreep ("harer", net als bij het
+// persoonlijk voornaamwoord "zij"); "ons" verbuigt met een stemhebbende s
+// (net als een zelfstandig naamwoord op -s): "onzes", "onzen" (vgl. "Onze
+// Vader", "onzes Heren").
+const BEZIT_VORMEN = {
+  mijn: { "": "mijn", e: "mijne", s: "mijns", er: "mijner", en: "mijnen" },
+  uw: { "": "uw", e: "uwe", s: "uws", er: "uwer", en: "uwen" },
+  dijn: { "": "dijn", e: "dijne", s: "dijns", er: "dijner", en: "dijnen" },
+  zijn: { "": "zijn", e: "zijne", s: "zijns", er: "zijner", en: "zijnen" },
+  haar: { "": "haar", e: "hare", s: "haars", er: "harer", en: "haren" },
+  ons: { "": "ons", e: "onze", s: "onzes", er: "onzer", en: "onzen" },
+};
+
+// "hun" verbuigt, in tegenstelling tot de andere bezittelijke voornaamwoorden,
+// helemaal niet: het blijft in alle naamvallen en bij elk geslacht "hun".
+function bezitVorm(stam, geslacht, geval) {
+  if (stam === "hun") return "hun";
+  const uitgangen = stam === "ons" ? ONS_UITGANGEN : BEZIT_UITGANGEN;
+  const uitgang = uitgangen[geval][geslacht];
+  return BEZIT_VORMEN[stam][uitgang];
+}
+
+// "uw" hoort historisch zowel bij "jij"/"u" als (informeel) "jullie" — die
+// kwamen immers allemaal van "gij". Bij de archaïsche "du"-instelling wordt
+// dit "dijn", net als "du" i.p.v. "gij" bij de persoonlijke voornaamwoorden.
+// "ons/onze" volgt in het modern Nederlands het geslacht van het
+// zelfstandig naamwoord (ons huis, onze vader) — de andere vormen zijn
+// modern onveranderlijk.
+const BEZITTELIJKE_STAMMEN = [
+  { id: "mijn", label: "mijn (van mij)", moderneVorm: () => "mijn", stam: () => "mijn" },
+  {
+    id: "uw",
+    label: "uw (van u/jou)",
+    moderneVorm: () => "uw",
+    stam: () => (haalArchaischDuOp() ? "dijn" : "uw"),
+  },
+  { id: "zijn", label: "zijn (van hem/het)", moderneVorm: () => "zijn", stam: () => "zijn" },
+  { id: "haar", label: "haar (van haar)", moderneVorm: () => "haar", stam: () => "haar" },
+  {
+    id: "ons",
+    label: "ons/onze (van ons)",
+    moderneVorm: (g) => (g === "o" ? "ons" : "onze"),
+    stam: () => "ons",
+  },
+  { id: "hun", label: "hun (van hen)", moderneVorm: () => "hun", stam: () => "hun" },
+];
+
+// Elk woord krijgt willekeurig één bezittelijk voornaamwoord toegewezen,
+// maar wel steeds hetzelfde voor alle 4 vragen van dat woord.
+function kiesBezittelijkVoornaamwoord(woordObj) {
+  if (!woordObj._bezittelijk) {
+    woordObj._bezittelijk =
+      BEZITTELIJKE_STAMMEN[Math.floor(Math.random() * BEZITTELIJKE_STAMMEN.length)];
+  }
+  return woordObj._bezittelijk;
+}
+
+function vormenBezittelijk(woordObj) {
+  const item = kiesBezittelijkVoornaamwoord(woordObj);
+  const g = woordObj.geslacht;
+  const stam = item.stam();
+  const resultaat = {};
+  CASES.forEach((geval) => {
+    resultaat[geval] = bezitVorm(stam, g, geval);
+  });
+  return resultaat;
+}
+
+function titelBezittelijk(woordObj) {
+  const stam = kiesBezittelijkVoornaamwoord(woordObj).stam();
+  return `${stam} + ${woordObj.woord}${geslachtSuffix(woordObj.geslacht)}`;
+}
+
+function zinsdelenBezittelijk(woordObj, geval) {
+  const noun = naamwoordVormVoorZin(woordObj, geval);
+  const hint = `bezittelijk voornaamwoord: ${kiesBezittelijkVoornaamwoord(woordObj).stam()}`;
+  if (geval === "nominatief") {
+    return { prefix: "Dit is", suffix: noun, hint };
+  }
+  if (geval === "genitief") {
+    return { prefix: "De naam van", suffix: noun, hint };
+  }
+  if (geval === "datief") {
+    if (isPersoon(woordObj)) {
+      return { prefix: "Ik geef", suffix: `${noun} een geschenk`, hint };
+    }
+    return { prefix: "Hij spreekt van", suffix: noun, hint };
+  }
+  if (geval === "accusatief") {
+    return { prefix: "Ik zie", suffix: noun, hint };
+  }
+}
+
+function volledigeZinConfigBezittelijk(woordObj, geval) {
+  const item = kiesBezittelijkVoornaamwoord(woordObj);
+  const g = woordObj.geslacht;
+  const modernBezit = item.moderneVorm(g);
+  const modernNoun = woordObj.woord;
+  const noun = naamwoordVormVoorZin(woordObj, geval);
+
+  function bouw(modernPrefix, prefix, extraVast) {
+    const suffixDelen = [
+      { tekst: noun, kritiek: true },
+      ...(extraVast ? extraVast.split(" ").map((t) => ({ tekst: t, kritiek: false })) : []),
+    ];
+    const moderneZinTekst = [modernPrefix, modernBezit, modernNoun, extraVast]
+      .filter(Boolean)
+      .join(" ");
+    const moderneZin = moderneZinTekst.charAt(0).toUpperCase() + moderneZinTekst.slice(1);
+    return { prefix, suffixDelen, moderneZin };
+  }
+
+  if (geval === "nominatief") return bouw("Dit is", "Dit is", "");
+  if (geval === "genitief") return bouw("De naam van", "De naam", "");
+  if (geval === "datief") {
+    if (isPersoon(woordObj)) return bouw("Ik geef", "Ik geef", "een geschenk");
+    return bouw("Hij spreekt van", "Hij spreekt van", "");
+  }
+  if (geval === "accusatief") return bouw("Ik zie", "Ik zie", "");
+}
+
 // --- Persoonlijke voornaamwoorden ---
 // Geen woordenlijst dit keer, maar een vaste set personen. "zij" (enkelvoud)
 // en "zij" (meervoud) zien er in modern Nederlands identiek uit maar hebben

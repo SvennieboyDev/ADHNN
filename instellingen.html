@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Instellingen — App der historische Nederlandse naamvallen</title>
-  <link rel="stylesheet" href="style.css?v=10">
+  <link rel="stylesheet" href="style.css?v=12">
 </head>
 <body>
   <main class="instellingen-screen">
@@ -82,7 +82,7 @@
           </span>
         </label>
 
-        <label class="instelling-optie">
+        <label class="instelling-optie" id="datief-vorm-modern-optie">
           <input type="radio" name="datief-vorm" value="modern">
           <span>
             <strong>Modernere vorm met "het"</strong>
@@ -95,7 +95,7 @@
       <fieldset id="archaisch-fieldset" hidden>
         <legend>Archaïsche/dialectische vormen</legend>
 
-        <label class="instelling-optie">
+        <label class="instelling-optie" id="archaisch-du-optie">
           <input type="checkbox" name="archaisch-du">
           <span>
             <strong>Du</strong> in plaats van gij (voor jij/u)
@@ -106,14 +106,14 @@
           </span>
         </label>
 
-        <label class="instelling-optie">
+        <label class="instelling-optie" id="archaisch-gijlieden-optie">
           <input type="checkbox" name="archaisch-gijlieden">
           <span>
             <strong>Gijlieden</strong> in plaats van gij (voor jullie)
           </span>
         </label>
 
-        <label class="instelling-optie">
+        <label class="instelling-optie" id="archaisch-wijlieden-optie">
           <input type="checkbox" name="archaisch-wijlieden">
           <span>
             <strong>Wijlieden</strong> in plaats van wij
@@ -180,7 +180,7 @@
     </form>
   </main>
 
-  <script src="js/oefening-data.js?v=10"></script>
-  <script src="js/instellingen.js?v=10"></script>
+  <script src="js/oefening-data.js?v=12"></script>
+  <script src="js/instellingen.js?v=12"></script>
 </body>
 </html>
