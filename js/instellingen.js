@@ -17,11 +17,23 @@ if (heeftGeslacht) {
 }
 
 // Geldt voor precies dezelfde categorieën als de geslachtsinstelling: elke
-// oefening met een zelfstandig naamwoord.
+// oefening met een zelfstandig naamwoord. De "modernere vorm met het"-optie
+// is alleen zinvol waar er ook echt een den/het-keuze bestaat (bepaald
+// lidwoord zelf en de zwakke verbuiging, die dat lidwoord ook gebruikt) —
+// bij onbepaald lidwoord, sterke/gemengde verbuiging en bezittelijke
+// voornaamwoorden bestaat dat den/het-onderscheid niet, dus daar wordt die
+// optie verborgen (en gedraagt hij zich, mocht hij toch nog opgeslagen
+// staan, identiek aan "vervoegen volgens de regels").
 const datiefVormFieldset = document.getElementById("datief-vorm-fieldset");
 datiefVormFieldset.hidden = !heeftGeslacht;
+const heeftModernDatiefVorm =
+  volgende === "bepaald-lidwoord.html" || volgende === "bijvoeglijk-naamwoord-zwak.html";
+document.getElementById("datief-vorm-modern-optie").hidden = !heeftModernDatiefVorm;
 if (heeftGeslacht) {
-  const huidigeDatiefVorm = haalDatiefVormOp();
+  let huidigeDatiefVorm = haalDatiefVormOp();
+  if (huidigeDatiefVorm === "modern" && !heeftModernDatiefVorm) {
+    huidigeDatiefVorm = "tabel";
+  }
   document.querySelector(`input[name="datief-vorm"][value="${huidigeDatiefVorm}"]`).checked = true;
 }
 

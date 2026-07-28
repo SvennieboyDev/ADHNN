@@ -531,14 +531,24 @@ const BEZIT_UITGANGEN = {
   accusatief: { m: "en", v: "e", o: "" },
 };
 
+// "ons" is zelf weer een uitzondering op die uitzondering: het heeft geen
+// onverbogen mannelijk nominatief ("onze broer", niet "ons broer") en volgt
+// dus gewoon de gangbare sterke-verbuigingsuitgang. Alleen bij onzijdig
+// enkelvoud blijft de kale vorm staan ("ons huis", "ons hart").
+const ONS_UITGANGEN = {
+  nominatief: { m: "e", v: "e", o: "" },
+  genitief: { m: "s", v: "er", o: "s" },
+  datief: { m: "en", v: "er", o: "en" },
+  accusatief: { m: "en", v: "e", o: "" },
+};
+
 // Elke vorm is met de hand afgeleid volgens dezelfde spellingregels als
 // elders in de app: "mijn"/"zijn"/"dijn" veranderen nooit (ij is een
 // tweeklank, geen klinker om te verdubbelen of te verkorten); "haar"
 // verliest de dubbele a in een open lettergreep ("harer", net als bij het
 // persoonlijk voornaamwoord "zij"); "ons" verbuigt met een stemhebbende s
 // (net als een zelfstandig naamwoord op -s): "onzes", "onzen" (vgl. "Onze
-// Vader", "onzes Heren"); "hun" verdubbelt de n ("hunne", "hunner", net als
-// bij "zij" meervoud).
+// Vader", "onzes Heren").
 const BEZIT_VORMEN = {
   mijn: { "": "mijn", e: "mijne", s: "mijns", er: "mijner", en: "mijnen" },
   uw: { "": "uw", e: "uwe", s: "uws", er: "uwer", en: "uwen" },
@@ -546,11 +556,14 @@ const BEZIT_VORMEN = {
   zijn: { "": "zijn", e: "zijne", s: "zijns", er: "zijner", en: "zijnen" },
   haar: { "": "haar", e: "hare", s: "haars", er: "harer", en: "haren" },
   ons: { "": "ons", e: "onze", s: "onzes", er: "onzer", en: "onzen" },
-  hun: { "": "hun", e: "hunne", s: "huns", er: "hunner", en: "hunnen" },
 };
 
+// "hun" verbuigt, in tegenstelling tot de andere bezittelijke voornaamwoorden,
+// helemaal niet: het blijft in alle naamvallen en bij elk geslacht "hun".
 function bezitVorm(stam, geslacht, geval) {
-  const uitgang = BEZIT_UITGANGEN[geval][geslacht];
+  if (stam === "hun") return "hun";
+  const uitgangen = stam === "ons" ? ONS_UITGANGEN : BEZIT_UITGANGEN;
+  const uitgang = uitgangen[geval][geslacht];
   return BEZIT_VORMEN[stam][uitgang];
 }
 
