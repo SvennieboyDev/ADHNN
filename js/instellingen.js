@@ -8,6 +8,7 @@ const geslachtFieldset = document.getElementById("geslacht-fieldset");
 const heeftGeslacht =
   volgende === "bepaald-lidwoord.html" ||
   volgende === "onbepaald-lidwoord.html" ||
+  volgende === "bezittelijke-voornaamwoorden.html" ||
   volgende.startsWith("bijvoeglijk-naamwoord");
 geslachtFieldset.hidden = !heeftGeslacht;
 if (heeftGeslacht) {
@@ -32,11 +33,23 @@ if (heeftBijvoeglijkeNaamwoorden) {
   document.querySelector(`input[name="klinker"][value="${huidigeKlinker}"]`).checked = true;
 }
 
+// "Du" i.p.v. "gij" is ook relevant bij bezittelijke voornaamwoorden
+// ("dijn" i.p.v. "uw"); "gijlieden"/"wijlieden" gelden vooralsnog alleen bij
+// de persoonlijke voornaamwoorden zelf, dus die twee opties worden verborgen
+// als ze niets doen — anders zou de instelling verwarrend lijken.
 const archaischFieldset = document.getElementById("archaisch-fieldset");
-const heeftArchaischeVormen = volgende === "persoonlijke-voornaamwoorden.html";
+const heeftDu =
+  volgende === "persoonlijke-voornaamwoorden.html" || volgende === "bezittelijke-voornaamwoorden.html";
+const heeftGijliedenWijlieden = volgende === "persoonlijke-voornaamwoorden.html";
+const heeftArchaischeVormen = heeftDu || heeftGijliedenWijlieden;
 archaischFieldset.hidden = !heeftArchaischeVormen;
-if (heeftArchaischeVormen) {
+document.getElementById("archaisch-du-optie").hidden = !heeftDu;
+document.getElementById("archaisch-gijlieden-optie").hidden = !heeftGijliedenWijlieden;
+document.getElementById("archaisch-wijlieden-optie").hidden = !heeftGijliedenWijlieden;
+if (heeftDu) {
   document.querySelector('input[name="archaisch-du"]').checked = haalArchaischDuOp();
+}
+if (heeftGijliedenWijlieden) {
   document.querySelector('input[name="archaisch-gijlieden"]').checked = haalArchaischGijliedenOp();
   document.querySelector('input[name="archaisch-wijlieden"]').checked = haalArchaischWijliedenOp();
 }
@@ -94,8 +107,10 @@ document.getElementById("instellingen-form").addEventListener("submit", (e) => {
     const klinker = document.querySelector('input[name="klinker"]:checked').value;
     zetKlinkerspelling(klinker);
   }
-  if (heeftArchaischeVormen) {
+  if (heeftDu) {
     zetArchaischDu(document.querySelector('input[name="archaisch-du"]').checked);
+  }
+  if (heeftGijliedenWijlieden) {
     zetArchaischGijlieden(document.querySelector('input[name="archaisch-gijlieden"]').checked);
     zetArchaischWijlieden(document.querySelector('input[name="archaisch-wijlieden"]').checked);
   }
